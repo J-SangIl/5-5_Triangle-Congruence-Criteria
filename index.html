@@ -65,11 +65,76 @@
   .mission-complete .another-problem{background:#2563eb;color:#fff}
   .mission-complete .another-mission{background:#eef2ff;color:#4338ca}
   .value-row{display:flex;align-items:center;gap:5px;margin-top:7px}.value-row .unit{font-size:11px;color:#64748b;width:15px;flex:0 0 15px}
+  .tutorial-overlay{position:fixed;inset:0;z-index:50;background:rgba(15,23,42,.58);display:flex;align-items:center;justify-content:center;padding:24px}
+  .tutorial-card{width:min(620px,94vw);background:#fff;border-radius:24px;box-shadow:0 24px 70px rgba(15,23,42,.28);overflow:hidden}
+  .tutorial-visual{height:250px;background:linear-gradient(145deg,#eef6ff,#f7f3ff);display:flex;align-items:center;justify-content:center;padding:20px}
+  .tutorial-visual svg{width:100%;height:100%;max-width:500px}
+  .tutorial-body{padding:24px 28px 28px;text-align:center}
+  .tutorial-body h2{margin:0 0 14px;font-size:24px;color:#172033}
+  .tutorial-body p{margin:8px 0;line-height:1.65;font-size:16px;color:#475569}
+  .tutorial-body strong{color:#1d4ed8}
+  .tutorial-actions{margin-top:18px;display:flex;align-items:center;justify-content:center;gap:10px}
+  .tutorial-btn{border:0;border-radius:13px;padding:12px 26px;font-size:16px;font-weight:800;cursor:pointer}
+  .tutorial-btn.primary{background:#2563eb;color:#fff}
+  .tutorial-btn.secondary{background:#eef2ff;color:#4338ca}
+  .tutorial-dots{display:flex;justify-content:center;gap:7px;margin-top:16px}
+  .tutorial-dot{width:9px;height:9px;border-radius:50%;background:#cbd5e1}
+  .tutorial-dot.active{background:#2563eb}
+  .tutorial-page.hidden{display:none!important}
   .hidden{display:none!important}
   @media (max-width:850px){#app{grid-template-columns:154px 1fr}.title{font-size:17px}.status{display:none}}
 </style>
 </head>
 <body>
+<div class="tutorial-overlay" id="tutorialOverlay">
+  <div class="tutorial-card" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
+    <section class="tutorial-page" data-page="0">
+      <div class="tutorial-visual">
+        <svg viewBox="0 0 520 230" role="img" aria-label="선분과 각을 움직여 삼각형을 만드는 모습">
+          <defs><filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="5" stdDeviation="6" flood-opacity=".18"/></filter></defs>
+          <rect x="18" y="18" width="484" height="194" rx="20" fill="white" filter="url(#shadow)"/>
+          <path d="M115 166 L252 55 L405 166 Z" fill="rgba(37,99,235,.13)" stroke="#2563eb" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="115" cy="166" r="9" fill="white" stroke="#2563eb" stroke-width="5"/><circle cx="252" cy="55" r="9" fill="white" stroke="#2563eb" stroke-width="5"/><circle cx="405" cy="166" r="9" fill="white" stroke="#2563eb" stroke-width="5"/>
+          <path d="M142 166 A27 27 0 0 1 133 145" fill="none" stroke="#f59e0b" stroke-width="5"/>
+          <text x="244" y="42" font-size="20" font-weight="800" fill="#111827">A</text><text x="258" y="126" font-size="20" font-weight="800" fill="#111827">a</text>
+          <text x="92" y="159" font-size="20" font-weight="800" fill="#111827">B</text><text x="326" y="102" font-size="20" font-weight="800" fill="#111827">b</text>
+          <text x="408" y="159" font-size="20" font-weight="800" fill="#111827">C</text><text x="176" y="119" font-size="20" font-weight="800" fill="#111827">c</text>
+          <path d="M74 74 C52 91 51 121 71 139" fill="none" stroke="#64748b" stroke-width="4" stroke-linecap="round"/><path d="M67 130 L72 140 L82 135" fill="none" stroke="#64748b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="tutorial-body">
+        <h2 id="tutorialTitle">삼각형을 만들어 보세요</h2>
+        <p>주어진 조건을 만족하는 삼각형을 만들어 보세요.</p>
+        <p>같은 알파벳인 <strong>A와 a, B와 b, C와 c</strong>는 서로 대각과 대변입니다.</p>
+        <div class="tutorial-actions"><button class="tutorial-btn primary" id="tutorialNext">다음</button></div>
+        <div class="tutorial-dots" aria-hidden="true"><span class="tutorial-dot active"></span><span class="tutorial-dot"></span></div>
+      </div>
+    </section>
+    <section class="tutorial-page hidden" data-page="1">
+      <div class="tutorial-visual">
+        <svg viewBox="0 0 520 230" role="img" aria-label="미션 1부터 5까지 차례로 선택하는 모습">
+          <rect x="18" y="18" width="484" height="194" rx="20" fill="white" filter="url(#shadow)"/>
+          <text x="260" y="60" text-anchor="middle" font-size="22" font-weight="800" fill="#172033">미션 모드</text>
+          <g font-size="24" font-weight="800" text-anchor="middle">
+            <rect x="58" y="91" width="68" height="58" rx="14" fill="#dbeafe" stroke="#2563eb" stroke-width="3"/><text x="92" y="128" fill="#1d4ed8">1</text>
+            <rect x="142" y="91" width="68" height="58" rx="14" fill="#eef2ff" stroke="#6366f1" stroke-width="3"/><text x="176" y="128" fill="#4338ca">2</text>
+            <rect x="226" y="91" width="68" height="58" rx="14" fill="#f3e8ff" stroke="#9333ea" stroke-width="3"/><text x="260" y="128" fill="#7e22ce">3</text>
+            <rect x="310" y="91" width="68" height="58" rx="14" fill="#fef3c7" stroke="#d97706" stroke-width="3"/><text x="344" y="128" fill="#b45309">4</text>
+            <rect x="394" y="91" width="68" height="58" rx="14" fill="#dcfce7" stroke="#16a34a" stroke-width="3"/><text x="428" y="128" fill="#15803d">5</text>
+          </g>
+          <path d="M92 170 C170 205 350 205 428 170" fill="none" stroke="#64748b" stroke-width="4" stroke-dasharray="7 8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="tutorial-body">
+        <h2>미션은 모두 5개예요</h2>
+        <p><strong>미션 1부터 미션 5까지</strong> 모두 선택해 삼각형을 만들어 보세요.</p>
+        <p>각 미션에서 어떤 조건이 삼각형을 하나로 정하는지 직접 비교해 보세요.</p>
+        <div class="tutorial-actions"><button class="tutorial-btn secondary" id="tutorialPrev">이전</button><button class="tutorial-btn primary" id="tutorialStart">시작하기</button></div>
+        <div class="tutorial-dots" aria-hidden="true"><span class="tutorial-dot"></span><span class="tutorial-dot active"></span></div>
+      </div>
+    </section>
+  </div>
+</div>
 <div id="app">
   <header>
     <div class="title">△ 삼각형 결정조건 탐구</div>
@@ -215,7 +280,7 @@
   function vertexIndexForPoint(p,t){
     let vi=0;
     for(let i=1;i<t.vertices.length;i++)if(dist(p,t.vertices[i])<dist(p,t.vertices[vi]))vi=i;
-    return dist(p,t.vertices[vi])<=CLOSE_TOL?vi:-1;
+    return dist(p,t.vertices[vi])<=6?vi:-1;
   }
   function sideVertexPairByLabel(t,label){
     const index=t.trio.findIndex(s=>s.mission&&s.type==='segment'&&s.label===label);
@@ -229,7 +294,7 @@
       else if(v===vi)dirs.push(Math.atan2(t.vertices[u].y-t.vertices[v].y,t.vertices[u].x-t.vertices[v].x));
     });
     if(dirs.length!==2)return false;
-    const rays=rayAngles(a),tol=8*Math.PI/180;
+    const rays=rayAngles(a),tol=0.75*Math.PI/180;
     return (angleDiff(rays[0],dirs[0])<=tol&&angleDiff(rays[1],dirs[1])<=tol)||
            (angleDiff(rays[0],dirs[1])<=tol&&angleDiff(rays[1],dirs[0])<=tol);
   }
@@ -394,8 +459,10 @@
 
   canvas.addEventListener('pointerup',e=>{
     const p=pointerPos(e); const d=state.drag;
-    if(d?.kind==='createSegment' && dist(d.preview.a,d.preview.b)>8)addSegment(d.preview.a.x,d.preview.a.y,d.preview.b.x,d.preview.b.y);
-    if(d?.kind==='createAngle')addAngle(d.start.x,d.start.y,d.preview.size*180/Math.PI,d.preview.rotation);
+    let created=false;
+    if(d?.kind==='createSegment' && dist(d.preview.a,d.preview.b)>8){addSegment(d.preview.a.x,d.preview.a.y,d.preview.b.x,d.preview.b.y);created=true}
+    if(d?.kind==='createAngle'){addAngle(d.start.x,d.start.y,d.preview.size*180/Math.PI,d.preview.rotation);created=true}
+    if(created)setTool('select');
     if(d?.kind==='move' && isOverTrash(p) && hasDeletableSelection()) deleteSelected();
     state.drag=null;trash.classList.remove('hot');
     if(state.box){
@@ -461,8 +528,8 @@
   document.getElementById('redoBtn').onclick=redo;
   document.getElementById('clearBtn').onclick=()=>{saveHistory();state.shapes=[];state.selected.clear();if(state.mode==='mission')loadMission(state.selectedMission);draw()};
   window.addEventListener('keydown',e=>{if((e.key==='Delete'||e.key==='Backspace')&&state.selected.size&&hasDeletableSelection()){saveHistory();deleteSelected()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}});
-  document.getElementById('addSegmentByValue').onclick=()=>{saveHistory();const v=clamp(parseFloat(document.getElementById('lengthInput').value)||5,.1,10);const y=120+Math.random()*Math.max(50,H-240);addSegment(W/2-v*pxPerUnit/2,y,W/2+v*pxPerUnit/2,y);draw()};
-  document.getElementById('addAngleByValue').onclick=()=>{saveHistory();const v=clamp(parseFloat(document.getElementById('angleInput').value)||60,1,179);addAngle(W/2,H/2,v,0);draw()};
+  document.getElementById('addSegmentByValue').onclick=()=>{saveHistory();const v=clamp(parseFloat(document.getElementById('lengthInput').value)||5,.1,10);const y=120+Math.random()*Math.max(50,H-240);addSegment(W/2-v*pxPerUnit/2,y,W/2+v*pxPerUnit/2,y);setTool('select');draw()};
+  document.getElementById('addAngleByValue').onclick=()=>{saveHistory();const v=clamp(parseFloat(document.getElementById('angleInput').value)||60,1,179);addAngle(W/2,H/2,v,0);setTool('select');draw()};
   document.getElementById('newMission').onclick=()=>loadMission(state.selectedMission);
   document.getElementById('anotherProblem').onclick=()=>loadMission(state.selectedMission);
   document.getElementById('anotherMission').onclick=()=>{let next=state.selectedMission;while(next===state.selectedMission)next=Math.floor(Math.random()*5);state.selectedMission=next;loadMission(next)};
@@ -493,6 +560,14 @@
     }
     statusText.textContent='주어진 도형을 움직여 삼각형을 만들어 보세요.';draw();
   }
+
+  const tutorialOverlay=document.getElementById('tutorialOverlay');
+  const tutorialPages=[...document.querySelectorAll('.tutorial-page')];
+  function showTutorialPage(index){tutorialPages.forEach((page,i)=>page.classList.toggle('hidden',i!==index));}
+  document.getElementById('tutorialNext').onclick=()=>showTutorialPage(1);
+  document.getElementById('tutorialPrev').onclick=()=>showTutorialPage(0);
+  document.getElementById('tutorialStart').onclick=()=>tutorialOverlay.classList.add('hidden');
+  tutorialOverlay.addEventListener('click',e=>{if(e.target.id==='tutorialOverlay')tutorialOverlay.classList.add('hidden')});
 
   updateToolUI();updateHistoryButtons();resize();setMode('mission');
 })();
