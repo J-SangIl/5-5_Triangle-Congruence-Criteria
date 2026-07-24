@@ -55,11 +55,14 @@
   canvas{width:100%;height:100%;display:block;touch-action:none;cursor:default}
   .trash{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:72px;height:72px;border-radius:22px;border:2px dashed #fca5a5;background:#fff5f5;display:flex;align-items:center;justify-content:center;font-size:30px;transition:.15s;user-select:none}
   .trash.hot{transform:translateX(-50%) scale(1.1);background:#fee2e2;border-color:#ef4444}
-  .hint{position:absolute;right:16px;bottom:16px;background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:12px;padding:9px 12px;font-size:12px;color:#667085;pointer-events:none}
   .mission-top{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:8px;padding:7px 9px;background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:15px;box-shadow:0 4px 14px rgba(15,23,42,.08)}
+  .help-btn{position:absolute;top:16px;right:18px;z-index:6;width:36px;height:36px;border:1px solid var(--border);border-radius:50%;background:rgba(255,255,255,.97);color:#334155;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 3px 10px rgba(15,23,42,.10)}
+  .help-btn:hover{background:#eef5ff;color:#1d4ed8}
   .mission-top .mission-btn{height:36px;min-width:38px;font-size:19px;padding:0 10px}
-  .mission-complete{position:absolute;top:72px;right:18px;z-index:5;width:250px;padding:14px;background:rgba(255,255,255,.97);border:2px solid #86efac;border-radius:16px;box-shadow:0 8px 24px rgba(15,23,42,.15);pointer-events:auto}
+  .mission-complete{position:absolute;top:68px;left:50%;transform:translateX(-50%);z-index:5;width:270px;padding:14px;background:rgba(255,255,255,.97);border:2px solid #86efac;border-radius:16px;box-shadow:0 8px 24px rgba(15,23,42,.15);pointer-events:auto}
   .mission-complete strong{display:block;margin-bottom:10px;font-size:18px;color:#15803d;text-align:center}
+  .mission-complete.error{border-color:#fca5a5;background:rgba(255,247,247,.98)}
+  .mission-complete.error strong{color:#dc2626;font-size:16px;line-height:1.45}
   .mission-complete .complete-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
   .mission-complete button{border:0;border-radius:10px;padding:10px 8px;font-weight:800;cursor:pointer}
   .mission-complete .another-problem{background:#2563eb;color:#fff}
@@ -139,8 +142,8 @@
   <header>
     <div class="title">△ 삼각형 결정조건 탐구</div>
     <div class="mode-tabs">
-      <button class="tab" data-mode="free">자유 모드</button>
       <button class="tab active" data-mode="mission">미션 모드</button>
+      <button class="tab" data-mode="free">자유 모드</button>
     </div>
     <div class="status" id="statusText">선분 또는 각을 추가해 보세요.</div>
   </header>
@@ -172,11 +175,12 @@
   <main id="canvasWrap">
     <div class="mission-top" id="missionControls">
       <div class="mission-select" id="missionSelect">
-        <button class="mission-choice active" data-mission="0">1</button><button class="mission-choice" data-mission="1">2</button><button class="mission-choice" data-mission="2">3</button><button class="mission-choice" data-mission="3">4</button><button class="mission-choice" data-mission="4">5</button>
+        <button class="mission-choice" data-mission="0">1</button><button class="mission-choice active" data-mission="1">2</button><button class="mission-choice" data-mission="2">3</button><button class="mission-choice" data-mission="3">4</button><button class="mission-choice" data-mission="4">5</button>
       </div>
       <button class="mission-btn" id="newMission" title="새 문제" aria-label="새 문제">⟳</button>
     </div>
     <canvas id="canvas"></canvas>
+    <button class="help-btn" id="tutorialHelp" title="튜토리얼 다시 보기" aria-label="튜토리얼 다시 보기">?</button>
     <div class="mission-complete hidden" id="missionComplete">
       <strong>삼각형을 만들었어요!</strong>
       <div class="complete-actions">
@@ -185,7 +189,6 @@
       </div>
     </div>
     <div class="trash" id="trash">🗑️</div>
-    <div class="hint">몸통 이동 · 끝점 길이 조절 · 바깥 손잡이 회전 · 가까운 꼭짓점 자동 결합</div>
   </main>
 </div>
 <script>
@@ -200,7 +203,7 @@
 
   const state = {
     mode:'mission', tool:'select', shapes:[], selected:new Set(),
-    drag:null, hover:null, box:null, nextId:1, missionType:0, selectedMission:0, undo:[], redo:[], missionCompleted:false
+    drag:null, hover:null, box:null, nextId:1, missionType:1, selectedMission:1, undo:[], redo:[], missionCompleted:false, mission5Solutions:[]
   };
   const palette={segment:'#0ea5e9',angle:'#f59e0b',mission:'#111111',selected:'#ef4444'};
   const SNAP=16, CLOSE_TOL=13, LINE_SNAP_DEG=6;
@@ -335,18 +338,74 @@
     }
     return true;
   }
+  function mission5UsesWrongIncludedAngle(t){
+    if(state.mode!=='mission'||state.missionType!==4)return false;
+    const missionSegments=state.shapes.filter(s=>s.mission&&s.type==='segment');
+    if(!missionSegments.every(ms=>t.trio.some(s=>s.id===ms.id)))return false;
+    const givenAngle=state.shapes.find(s=>s.mission&&s.type==='angle'&&s.label==='A');
+    if(!givenAngle)return false;
+    const vi=vertexIndexForPoint(givenAngle.v,t);
+    if(!angleFitsTriangleAtVertex(givenAngle,t,vi))return false;
+    const aSide=sideVertexPairByLabel(t,'a'),bSide=sideVertexPairByLabel(t,'b');
+    if(!aSide||!bSide)return false;
+    const common=aSide.find(v=>bSide.includes(v));
+    return common!==undefined&&vi===common;
+  }
+  function mission5SolutionValue(t){
+    // 주어진 a, b가 아닌 세 번째 변의 길이를 이용해 두 SSA 해를 구별한다.
+    const unknown=t.trio.find(s=>!s.mission);
+    if(!unknown)return null;
+    return dist(unknown.a,unknown.b)/pxPerUnit;
+  }
+  function updateMissionComplete(message,showActions,tone='success'){
+    const complete=document.getElementById('missionComplete');
+    complete.querySelector('strong').textContent=message;
+    complete.querySelector('.complete-actions').classList.toggle('hidden',!showActions);
+    complete.classList.toggle('error',tone==='error');
+    complete.classList.remove('hidden');
+  }
+  function hideMissionComplete(){
+    const complete=document.getElementById('missionComplete');
+    complete.classList.add('hidden');
+    complete.classList.remove('error');
+  }
   function drawCompletedTriangles(){
     const triangles=findCompletedTriangles();
+    const wrongIncluded=triangles.filter(mission5UsesWrongIncludedAngle);
     for(const t of triangles){
       const [a,b,c]=t.vertices;
-      ctx.save();ctx.fillStyle='rgba(34,197,94,.20)';ctx.strokeStyle='rgba(22,163,74,.75)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+      const wrong=wrongIncluded.includes(t);
+      ctx.save();
+      ctx.fillStyle=wrong?'rgba(239,68,68,.24)':'rgba(34,197,94,.20)';
+      ctx.strokeStyle=wrong?'rgba(220,38,38,.88)':'rgba(22,163,74,.75)';
+      ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
     }
-    if(state.mode==='mission'&&!state.missionCompleted&&triangles.some(missionTriangleMatches)){
-      state.missionCompleted=true;
-      const complete=document.getElementById('missionComplete');
-      complete.querySelector('strong').textContent=state.missionType===4?'다른 삼각형은 없을까요?':'삼각형을 만들었어요!';
-      complete.classList.remove('hidden');
+    if(state.mode!=='mission'||state.missionCompleted)return;
+    const matches=triangles.filter(missionTriangleMatches);
+
+    if(state.missionType===4){
+      for(const t of matches){
+        const value=mission5SolutionValue(t);
+        if(value===null)continue;
+        const isNew=state.mission5Solutions.every(v=>Math.abs(v-value)>0.18);
+        if(isNew)state.mission5Solutions.push(value);
+      }
+      if(state.mission5Solutions.length>=2){
+        state.missionCompleted=true;
+        updateMissionComplete('두 개 모두 찾았어요!',true);
+      }else if(state.mission5Solutions.length===1){
+        updateMissionComplete('다른 삼각형은 없을까요?',false);
+      }else if(wrongIncluded.length){
+        updateMissionComplete('각의 이름을 확인해서 대변과 대각의 쌍을 맞춰 보세요.',false,'error');
+      }else{
+        hideMissionComplete();
+      }
+      return;
     }
+
+    if(!matches.length){hideMissionComplete();return;}
+    state.missionCompleted=true;
+    updateMissionComplete('삼각형을 만들었어요!',true);
   }
   function drawGrid(){
     ctx.save(); ctx.strokeStyle='#f1f5f9'; ctx.lineWidth=1;
@@ -406,8 +465,15 @@
   canvas.addEventListener('pointerdown',e=>{
     canvas.setPointerCapture(e.pointerId); const p=pointerPos(e); const hit=hitTest(p);
     if(state.tool==='segment'){
-      saveHistory(); const sp=snapPoint(p,null);
-      state.drag={kind:'createSegment',start:sp,preview:{type:'segment',a:sp,b:sp}};return;
+      saveHistory();
+      const startSnap=nearestVertex(p,null);
+      const sp=startSnap?{x:startSnap.p.x,y:startSnap.p.y}:{x:p.x,y:p.y};
+      state.drag={
+        kind:'createSegment',start:sp,
+        angleAnchor:startSnap?.shape?.type==='angle'?startSnap.shape.id:null,
+        preview:{type:'segment',a:sp,b:{x:sp.x,y:sp.y}}
+      };
+      return;
     }
     if(state.tool==='angle' && state.mode==='free'){
       saveHistory(); state.drag={kind:'createAngle',start:p,preview:{type:'angle',v:p,size:Math.PI/3,rotation:0}};return;
@@ -436,7 +502,23 @@
     if(state.box){state.box.end=p;draw();return}
     if(!state.drag){state.hover=hitTest(p);return}
     const d=state.drag;
-    if(d.kind==='createSegment'){d.preview.b=snapPoint(p,null);draw();return}
+    if(d.kind==='createSegment'){
+      let end=snapPoint(p,null);
+      if(d.angleAnchor){
+        const angleShape=getShape(d.angleAnchor);
+        if(angleShape){
+          const len=Math.max(0,dist(d.start,end));
+          const rawAng=Math.atan2(end.y-d.start.y,end.x-d.start.x);
+          let bestAng=rawAng,bestDiff=LINE_SNAP_DEG*Math.PI/180;
+          for(const ray of rayAngles(angleShape)){
+            const diff=Math.abs(angleNorm(ray-rawAng));
+            if(diff<bestDiff){bestDiff=diff;bestAng=ray}
+          }
+          if(bestAng!==rawAng) end=pointOn(d.start,bestAng,len);
+        }
+      }
+      d.preview.b=end;draw();return
+    }
     if(d.kind==='createAngle'){
       const v={x:p.x-d.start.x,y:p.y-d.start.y};let size=Math.atan2(Math.abs(v.y),Math.abs(v.x))*2;size=clamp(size,5*Math.PI/180,Math.PI);d.preview.size=size;d.preview.rotation=Math.atan2(v.y,v.x);draw();return;
     }
@@ -511,10 +593,11 @@
 
   document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>setMode(btn.dataset.mode));
   function setMode(mode){
-    state.mode=mode;state.shapes=[];state.selected.clear();state.tool='select';state.undo=[];state.redo=[];state.missionCompleted=false;document.getElementById('missionComplete').classList.add('hidden');updateHistoryButtons();
+    state.mode=mode;state.shapes=[];state.selected.clear();state.tool='select';state.undo=[];state.redo=[];state.missionCompleted=false;state.mission5Solutions=[];document.getElementById('missionComplete').classList.add('hidden');updateHistoryButtons();
     document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
     document.getElementById('freeControls').classList.toggle('hidden',mode!=='free');
     document.getElementById('missionControls').classList.toggle('hidden',mode!=='mission');
+    document.getElementById('tutorialHelp').classList.toggle('hidden',mode!=='mission');
     document.getElementById('angleTool').classList.toggle('hidden',mode==='mission');
     if(mode==='mission')loadMission(state.selectedMission); else statusText.textContent='선분 또는 각을 추가해 보세요.';
     updateToolUI();draw();
@@ -545,7 +628,7 @@
   ];
 
   function loadMission(type=state.selectedMission){
-    state.shapes=[];state.selected.clear();state.tool='select';state.missionCompleted=false;document.getElementById('missionComplete').classList.add('hidden');updateToolUI();
+    state.shapes=[];state.selected.clear();state.tool='select';state.missionCompleted=false;state.mission5Solutions=[];document.getElementById('missionComplete').classList.add('hidden');updateToolUI();
     state.selectedMission=type;document.querySelectorAll('.mission-choice').forEach(b=>b.classList.toggle('active',Number(b.dataset.mission)===type));
     const bank=missionBanks[type], idx=Math.floor(Math.random()*bank.length), m=bank[idx];state.missionType=type;
     const cx=Math.max(250,W*.38), cy=Math.max(250,H*.48);
@@ -567,6 +650,7 @@
   document.getElementById('tutorialNext').onclick=()=>showTutorialPage(1);
   document.getElementById('tutorialPrev').onclick=()=>showTutorialPage(0);
   document.getElementById('tutorialStart').onclick=()=>tutorialOverlay.classList.add('hidden');
+  document.getElementById('tutorialHelp').onclick=()=>{showTutorialPage(0);tutorialOverlay.classList.remove('hidden')};
   tutorialOverlay.addEventListener('click',e=>{if(e.target.id==='tutorialOverlay')tutorialOverlay.classList.add('hidden')});
 
   updateToolUI();updateHistoryButtons();resize();setMode('mission');
