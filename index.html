@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>삼각형 결정조건 탐구</title>
+<style>
+  :root{
+    --bg:#f4f7fb;
+    --panel:#ffffff;
+    --line:#2f6fed;
+    --angle:#f59e0b;
+    --mission:#111111;
+    --user:#0ea5e9;
+    --text:#172033;
+    --muted:#6b7280;
+    --accent:#2563eb;
+    --danger:#ef4444;
+    --border:#dbe3ef;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;font-family:Pretendard,"Noto Sans KR",Arial,sans-serif;background:var(--bg);color:var(--text)}
+  button,input,select{font:inherit}
+  #app{height:100%;display:grid;grid-template-columns:178px 1fr;grid-template-rows:64px 1fr}
+  header{grid-column:1/3;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px;z-index:5}
+  .title{font-weight:800;font-size:20px;display:flex;align-items:center;gap:10px}
+  .mode-tabs{display:flex;gap:8px;background:#edf2f8;padding:4px;border-radius:14px}
+  .tab{border:0;background:transparent;padding:9px 16px;border-radius:10px;font-weight:700;cursor:pointer;color:#5b6576}
+  .tab.active{background:#fff;color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  .status{font-size:13px;color:var(--muted)}
+  aside{background:#fff;border-right:1px solid var(--border);padding:12px 10px;display:flex;flex-direction:column;gap:12px;overflow:auto;z-index:4}
+  .section{border:1px solid var(--border);border-radius:16px;padding:9px}
+  .section h3{margin:0 0 9px;font-size:14px;line-height:1.3;color:#334155;text-align:center}
+  .tool-grid{display:grid;grid-template-columns:1fr;gap:8px}
+  .tool-btn{height:58px;border:1px solid var(--border);background:#f8fafc;border-radius:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:25px;font-weight:700}
+  .tool-btn.active{outline:3px solid #bfd3ff;background:#eef5ff;color:#1d4ed8}
+  .icon-line{width:38px;height:4px;background:currentColor;border-radius:999px;position:relative}
+  .icon-line:before,.icon-line:after{content:"";position:absolute;width:10px;height:10px;border-radius:50%;background:currentColor;top:50%;transform:translateY(-50%)}
+  .icon-line:before{left:-2px}.icon-line:after{right:-2px}
+  .icon-angle{width:36px;height:30px;position:relative}
+  .icon-angle:before,.icon-angle:after{content:"";position:absolute;left:2px;bottom:3px;width:32px;border-top:3px dashed currentColor;transform-origin:left center}
+  .icon-angle:before{transform:rotate(-28deg)}.icon-angle:after{transform:rotate(28deg)}
+  .form-row{display:grid;grid-template-columns:1fr 34px;gap:6px;margin-top:7px}
+  .value-label{width:34px;flex:0 0 34px;font-size:13px;font-weight:800;color:#475569;text-align:center}
+  input[type=number]{width:100%;padding:8px 6px;border:1px solid var(--border);border-radius:10px;text-align:center}
+  .add-btn,.mission-btn,.action-btn{border:0;background:var(--accent);color:#fff;border-radius:10px;padding:8px;font-weight:800;cursor:pointer}
+  .action-btn.secondary{background:#64748b}.action-btn.danger{background:var(--danger)}
+  .mission-card{background:#f8f6ff;border:1px solid #ded6ff;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+  .mission-title{font-weight:800}.mission-cond{font-size:13px;line-height:1.5;color:#4b5563;min-height:58px}
+  .mini{font-size:12px;color:var(--muted)}
+  .row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+  .history-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.history-grid .action-btn{height:42px;font-size:20px}.history-grid .action-btn:last-child{grid-column:1/3;font-size:14px}
+  .mission-select{display:grid;grid-template-columns:repeat(5,42px);gap:6px}.mission-choice{height:36px;border:1px solid var(--border);background:#fff;border-radius:10px;font-weight:800;cursor:pointer}.mission-choice.active{background:#4f46e5;color:#fff;border-color:#4f46e5}
+  main{position:relative;overflow:hidden;background:#fff}
+  canvas{width:100%;height:100%;display:block;touch-action:none;cursor:default}
+  .trash{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);width:72px;height:72px;border-radius:22px;border:2px dashed #fca5a5;background:#fff5f5;display:flex;align-items:center;justify-content:center;font-size:30px;transition:.15s;user-select:none}
+  .trash.hot{transform:translateX(-50%) scale(1.1);background:#fee2e2;border-color:#ef4444}
+  .hint{position:absolute;right:16px;bottom:16px;background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:12px;padding:9px 12px;font-size:12px;color:#667085;pointer-events:none}
+  .mission-top{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:8px;padding:7px 9px;background:rgba(255,255,255,.96);border:1px solid var(--border);border-radius:15px;box-shadow:0 4px 14px rgba(15,23,42,.08)}
+  .mission-top .mission-btn{height:36px;min-width:38px;font-size:19px;padding:0 10px}
+  .mission-complete{position:absolute;top:72px;right:18px;z-index:5;width:250px;padding:14px;background:rgba(255,255,255,.97);border:2px solid #86efac;border-radius:16px;box-shadow:0 8px 24px rgba(15,23,42,.15);pointer-events:auto}
+  .mission-complete strong{display:block;margin-bottom:10px;font-size:18px;color:#15803d;text-align:center}
+  .mission-complete .complete-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .mission-complete button{border:0;border-radius:10px;padding:10px 8px;font-weight:800;cursor:pointer}
+  .mission-complete .another-problem{background:#2563eb;color:#fff}
+  .mission-complete .another-mission{background:#eef2ff;color:#4338ca}
+  .value-row{display:flex;align-items:center;gap:5px;margin-top:7px}.value-row .unit{font-size:11px;color:#64748b;width:15px;flex:0 0 15px}
+  .hidden{display:none!important}
+  @media (max-width:850px){#app{grid-template-columns:154px 1fr}.title{font-size:17px}.status{display:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="title">△ 삼각형 결정조건 탐구</div>
+    <div class="mode-tabs">
+      <button class="tab" data-mode="free">자유 모드</button>
+      <button class="tab active" data-mode="mission">미션 모드</button>
+    </div>
+    <div class="status" id="statusText">선분 또는 각을 추가해 보세요.</div>
+  </header>
+
+  <aside>
+    <div class="section">
+      <div class="tool-grid">
+        <button class="tool-btn" id="selectTool" title="선택" aria-label="선택">↖</button>
+        <button class="tool-btn" id="segmentTool" title="선분" aria-label="선분"><span class="icon-line"></span></button>
+        <button class="tool-btn hidden" id="angleTool" title="각" aria-label="각"><span class="icon-angle"></span></button>
+      </div>
+    </div>
+
+    <div class="section hidden" id="freeControls">
+      <h3>값을 입력해서 추가</h3>
+      <div class="value-row"><span class="value-label">선분</span><input id="lengthInput" type="number" min="0.1" max="10" step="0.1" value="5" aria-label="선분 길이"><span class="unit">↔</span><button class="add-btn" id="addSegmentByValue" title="선분 추가" aria-label="선분 추가">＋</button></div>
+      <div class="value-row"><span class="value-label">각</span><input id="angleInput" type="number" min="1" max="179" step="1" value="60" aria-label="각의 크기"><span class="unit">°</span><button class="add-btn" id="addAngleByValue" title="각 추가" aria-label="각 추가">＋</button></div>
+    </div>
+
+    <div class="section">
+      <div class="history-grid">
+        <button class="action-btn secondary" id="undoBtn" title="되돌리기" aria-label="되돌리기">↶</button>
+        <button class="action-btn secondary" id="redoBtn" title="다시 실행" aria-label="다시 실행">↷</button>
+        <button class="action-btn danger" id="clearBtn" title="초기화" aria-label="초기화">⟳ 초기화</button>
+      </div>
+    </div>
+  </aside>
+
+  <main id="canvasWrap">
+    <div class="mission-top" id="missionControls">
+      <div class="mission-select" id="missionSelect">
+        <button class="mission-choice active" data-mission="0">1</button><button class="mission-choice" data-mission="1">2</button><button class="mission-choice" data-mission="2">3</button><button class="mission-choice" data-mission="3">4</button><button class="mission-choice" data-mission="4">5</button>
+      </div>
+      <button class="mission-btn" id="newMission" title="새 문제" aria-label="새 문제">⟳</button>
+    </div>
+    <canvas id="canvas"></canvas>
+    <div class="mission-complete hidden" id="missionComplete">
+      <strong>삼각형을 만들었어요!</strong>
+      <div class="complete-actions">
+        <button class="another-problem" id="anotherProblem">다른 문제</button>
+        <button class="another-mission" id="anotherMission">다른 미션</button>
+      </div>
+    </div>
+    <div class="trash" id="trash">🗑️</div>
+    <div class="hint">몸통 이동 · 끝점 길이 조절 · 바깥 손잡이 회전 · 가까운 꼭짓점 자동 결합</div>
+  </main>
+</div>
+<script>
+(() => {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  const wrap = document.getElementById('canvasWrap');
+  const trash = document.getElementById('trash');
+  const statusText = document.getElementById('statusText');
+  let dpr = Math.max(1, window.devicePixelRatio || 1);
+  let W=0,H=0;
+
+  const state = {
+    mode:'mission', tool:'select', shapes:[], selected:new Set(),
+    drag:null, hover:null, box:null, nextId:1, missionType:0, selectedMission:0, undo:[], redo:[], missionCompleted:false
+  };
+  const palette={segment:'#0ea5e9',angle:'#f59e0b',mission:'#111111',selected:'#ef4444'};
+  const SNAP=16, CLOSE_TOL=13, LINE_SNAP_DEG=6;
+  const pxPerUnit=38;
+
+  function resize(){
+    const r=wrap.getBoundingClientRect(); W=r.width; H=r.height;
+    dpr=Math.max(1,window.devicePixelRatio||1);
+    canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr);
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0); draw();
+  }
+  window.addEventListener('resize',resize);
+
+  const uid=()=>state.nextId++;
+  const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const angleNorm=a=>{while(a<=-Math.PI)a+=Math.PI*2;while(a>Math.PI)a-=Math.PI*2;return a};
+  const pointOn=(p,ang,len)=>({x:p.x+Math.cos(ang)*len,y:p.y+Math.sin(ang)*len});
+
+  function addSegment(x1,y1,x2,y2,opt={}){
+    const s={id:uid(),type:'segment',a:{x:x1,y:y1},b:{x:x2,y:y2},fixedLength:!!opt.fixedLength,mission:!!opt.mission,label:opt.label||'',lockedAngle:false};
+    state.shapes.push(s); return s;
+  }
+  function addAngle(x,y,sizeDeg=60,rotation=0,opt={}){
+    const a={id:uid(),type:'angle',v:{x,y},size:clamp(sizeDeg,1,179)*Math.PI/180,rotation,mission:!!opt.mission,label:opt.label||''};
+    state.shapes.push(a); return a;
+  }
+
+  function shapeVertices(s){
+    if(s.type==='segment') return [s.a,s.b];
+    return [s.v];
+  }
+  function rayAngles(s){return [s.rotation-s.size/2,s.rotation+s.size/2]}
+
+  function nearestVertex(p, excludeId=null){
+    let best=null;
+    for(const s of state.shapes){
+      if(s.id===excludeId) continue;
+      shapeVertices(s).forEach((v,i)=>{const d=dist(p,v);if(d<SNAP && (!best||d<best.d))best={shape:s,index:i,p:v,d}})
+    }
+    return best;
+  }
+  function snapPoint(p,excludeId){const n=nearestVertex(p,excludeId);return n?{x:n.p.x,y:n.p.y}:p}
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    drawGrid();
+    drawCompletedTriangles();
+    for(const s of state.shapes) drawShape(s);
+    if(state.box) drawSelectionBox();
+    if(state.drag?.preview) drawPreview(state.drag.preview);
+  }
+  function findCompletedTriangles(){
+    const segs=state.shapes.filter(s=>s.type==='segment'), triangles=[];
+    for(let i=0;i<segs.length;i++)for(let j=i+1;j<segs.length;j++)for(let k=j+1;k<segs.length;k++){
+      const trio=[segs[i],segs[j],segs[k]], ends=trio.flatMap(s=>[s.a,s.b]), clusters=[];
+      for(const p of ends){
+        let c=clusters.find(c=>dist(c.center,p)<=CLOSE_TOL);
+        if(!c){c={pts:[],center:{x:p.x,y:p.y}};clusters.push(c)}
+        c.pts.push(p);c.center={x:c.pts.reduce((a,q)=>a+q.x,0)/c.pts.length,y:c.pts.reduce((a,q)=>a+q.y,0)/c.pts.length};
+      }
+      if(clusters.length!==3||clusters.some(c=>c.pts.length!==2))continue;
+      const vertices=clusters.map(c=>c.center),[a,b,c]=vertices;
+      const area=Math.abs((b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x))/2;if(area<180)continue;
+      const edgeVertices=trio.map(s=>{
+        const ia=vertices.reduce((best,v,n)=>dist(s.a,v)<dist(s.a,vertices[best])?n:best,0);
+        const ib=vertices.reduce((best,v,n)=>dist(s.b,v)<dist(s.b,vertices[best])?n:best,0);
+        return [ia,ib];
+      });
+      if(edgeVertices.some(([a,b])=>a===b))continue;
+      triangles.push({trio,vertices,edgeVertices});
+    }
+    return triangles;
+  }
+  function angleDiff(a,b){return Math.abs(angleNorm(a-b))}
+  function vertexIndexForPoint(p,t){
+    let vi=0;
+    for(let i=1;i<t.vertices.length;i++)if(dist(p,t.vertices[i])<dist(p,t.vertices[vi]))vi=i;
+    return dist(p,t.vertices[vi])<=CLOSE_TOL?vi:-1;
+  }
+  function sideVertexPairByLabel(t,label){
+    const index=t.trio.findIndex(s=>s.mission&&s.type==='segment'&&s.label===label);
+    return index<0?null:t.edgeVertices[index];
+  }
+  function angleFitsTriangleAtVertex(a,t,vi){
+    if(vi<0)return false;
+    const dirs=[];
+    t.edgeVertices.forEach(([u,v])=>{
+      if(u===vi)dirs.push(Math.atan2(t.vertices[v].y-t.vertices[u].y,t.vertices[v].x-t.vertices[u].x));
+      else if(v===vi)dirs.push(Math.atan2(t.vertices[u].y-t.vertices[v].y,t.vertices[u].x-t.vertices[v].x));
+    });
+    if(dirs.length!==2)return false;
+    const rays=rayAngles(a),tol=8*Math.PI/180;
+    return (angleDiff(rays[0],dirs[0])<=tol&&angleDiff(rays[1],dirs[1])<=tol)||
+           (angleDiff(rays[0],dirs[1])<=tol&&angleDiff(rays[1],dirs[0])<=tol);
+  }
+  function missionTriangleMatches(t){
+    const missionSegments=state.shapes.filter(s=>s.mission&&s.type==='segment');
+    if(!missionSegments.every(ms=>t.trio.some(s=>s.id===ms.id)))return false;
+    const missionAngles=state.shapes.filter(s=>s.mission&&s.type==='angle');
+    const angleVertices=new Map();
+    for(const a of missionAngles){
+      const vi=vertexIndexForPoint(a.v,t);
+      if(!angleFitsTriangleAtVertex(a,t,vi))return false;
+      angleVertices.set(a.label,vi);
+    }
+
+    // 미션 2(SAS): 각 A는 반드시 주어진 두 변 b, c가 만나는 끼인각이어야 한다.
+    if(state.missionType===1){
+      const b=sideVertexPairByLabel(t,'b'),c=sideVertexPairByLabel(t,'c');
+      const vi=angleVertices.get('A');
+      if(!b||!c||vi===undefined)return false;
+      const common=b.find(v=>c.includes(v));
+      if(common===undefined||vi!==common)return false;
+    }
+
+    // 미션 3(ASA): 각 A와 B는 주어진 변 c의 서로 다른 양 끝각이어야 한다.
+    if(state.missionType===2){
+      const c=sideVertexPairByLabel(t,'c');
+      const va=angleVertices.get('A'),vb=angleVertices.get('B');
+      if(!c||va===undefined||vb===undefined)return false;
+      if(va===vb||!c.includes(va)||!c.includes(vb))return false;
+    }
+
+    // 미션 5(SSA): A는 반드시 변 a의 대각이어야 하며 끼인각은 인정하지 않는다.
+    if(state.missionType===4){
+      const aSide=sideVertexPairByLabel(t,'a'),vi=angleVertices.get('A');
+      if(!aSide||vi===undefined)return false;
+      const opposite=[0,1,2].find(n=>!aSide.includes(n));
+      if(vi!==opposite)return false;
+    }
+    return true;
+  }
+  function drawCompletedTriangles(){
+    const triangles=findCompletedTriangles();
+    for(const t of triangles){
+      const [a,b,c]=t.vertices;
+      ctx.save();ctx.fillStyle='rgba(34,197,94,.20)';ctx.strokeStyle='rgba(22,163,74,.75)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+    }
+    if(state.mode==='mission'&&!state.missionCompleted&&triangles.some(missionTriangleMatches)){
+      state.missionCompleted=true;
+      const complete=document.getElementById('missionComplete');
+      complete.querySelector('strong').textContent=state.missionType===4?'다른 삼각형은 없을까요?':'삼각형을 만들었어요!';
+      complete.classList.remove('hidden');
+    }
+  }
+  function drawGrid(){
+    ctx.save(); ctx.strokeStyle='#f1f5f9'; ctx.lineWidth=1;
+    for(let x=0;x<W;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    for(let y=0;y<H;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    ctx.restore();
+  }
+  function drawShape(s){
+    const selected=state.selected.has(s.id), color=s.mission?palette.mission:(s.type==='segment'?palette.segment:palette.angle);
+    ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round';
+    if(s.type==='segment'){
+      ctx.strokeStyle=selected?palette.selected:color; ctx.lineWidth=selected?5:4;
+      ctx.beginPath();ctx.moveTo(s.a.x,s.a.y);ctx.lineTo(s.b.x,s.b.y);ctx.stroke();
+      [s.a,s.b].forEach(p=>drawPoint(p,selected?palette.selected:color,7));
+      if(selected){
+        const ang=Math.atan2(s.b.y-s.a.y,s.b.x-s.a.x); const len=dist(s.a,s.b);
+        const h1=pointOn(s.a,ang+Math.PI,20),h2=pointOn(s.b,ang,20);
+        drawRotateHandle(h1);drawRotateHandle(h2);
+      }
+      if(s.label){ctx.fillStyle=color;ctx.font='700 15px sans-serif';ctx.fillText(s.label,(s.a.x+s.b.x)/2+8,(s.a.y+s.b.y)/2-8)}
+    } else {
+      const [r1,r2]=rayAngles(s), L=80;
+      ctx.strokeStyle=selected?palette.selected:color;ctx.lineWidth=3;ctx.setLineDash([8,6]);
+      for(const r of [r1,r2]){const e=pointOn(s.v,r,L);ctx.beginPath();ctx.moveTo(s.v.x,s.v.y);ctx.lineTo(e.x,e.y);ctx.stroke()}
+      ctx.setLineDash([]);drawPoint(s.v,selected?palette.selected:color,8);
+      ctx.strokeStyle=selected?palette.selected:color;ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(s.v.x,s.v.y,27,r1,r2);ctx.stroke();
+      if(s.label){ctx.fillStyle=color;ctx.font='700 15px sans-serif';ctx.fillText(s.label,s.v.x+12,s.v.y-12)}
+    }
+    ctx.restore();
+  }
+  function drawPoint(p,c,r){ctx.save();ctx.fillStyle='#fff';ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore()}
+  function drawRotateHandle(p){ctx.save();ctx.fillStyle='#fff';ctx.strokeStyle='#ef4444';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.font='10px sans-serif';ctx.fillStyle='#ef4444';ctx.fillText('↻',p.x-5,p.y+4);ctx.restore()}
+  function drawSelectionBox(){const b=normRect(state.box.start,state.box.end);ctx.save();ctx.fillStyle='rgba(37,99,235,.08)';ctx.strokeStyle='#2563eb';ctx.setLineDash([5,4]);ctx.fillRect(b.x,b.y,b.w,b.h);ctx.strokeRect(b.x,b.y,b.w,b.h);ctx.restore()}
+  function drawPreview(p){ctx.save();ctx.globalAlpha=.65;if(p.type==='segment'){ctx.strokeStyle=palette.segment;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(p.a.x,p.a.y);ctx.lineTo(p.b.x,p.b.y);ctx.stroke()}else{const [r1,r2]=rayAngles(p);ctx.strokeStyle=palette.angle;ctx.setLineDash([8,6]);for(const r of [r1,r2]){const e=pointOn(p.v,r,80);ctx.beginPath();ctx.moveTo(p.v.x,p.v.y);ctx.lineTo(e.x,e.y);ctx.stroke()}}ctx.restore()}
+
+  function pointerPos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+  function hitTest(p){
+    for(let i=state.shapes.length-1;i>=0;i--){
+      const s=state.shapes[i];
+      if(s.type==='segment'){
+        const ang=Math.atan2(s.b.y-s.a.y,s.b.x-s.a.x);
+        if(state.selected.has(s.id)){
+          const h1=pointOn(s.a,ang+Math.PI,20),h2=pointOn(s.b,ang,20);
+          if(dist(p,h1)<11)return{s,part:'rotateA'}; if(dist(p,h2)<11)return{s,part:'rotateB'};
+        }
+        if(dist(p,s.a)<11)return{s,part:'a'};if(dist(p,s.b)<11)return{s,part:'b'};
+        if(pointSegDist(p,s.a,s.b)<9)return{s,part:'body'};
+      } else {
+        if(dist(p,s.v)<12)return{s,part:'vertex'};
+        const [r1,r2]=rayAngles(s);for(const r of [r1,r2]){if(pointSegDist(p,s.v,pointOn(s.v,r,85))<10)return{s,part:'ray'}}
+      }
+    }return null;
+  }
+  function pointSegDist(p,a,b){const vx=b.x-a.x,vy=b.y-a.y,wx=p.x-a.x,wy=p.y-a.y,c1=vx*wx+vy*wy;if(c1<=0)return dist(p,a);const c2=vx*vx+vy*vy;if(c2<=c1)return dist(p,b);const t=c1/c2;return dist(p,{x:a.x+t*vx,y:a.y+t*vy})}
+
+  canvas.addEventListener('pointerdown',e=>{
+    canvas.setPointerCapture(e.pointerId); const p=pointerPos(e); const hit=hitTest(p);
+    if(state.tool==='segment'){
+      saveHistory(); const sp=snapPoint(p,null);
+      state.drag={kind:'createSegment',start:sp,preview:{type:'segment',a:sp,b:sp}};return;
+    }
+    if(state.tool==='angle' && state.mode==='free'){
+      saveHistory(); state.drag={kind:'createAngle',start:p,preview:{type:'angle',v:p,size:Math.PI/3,rotation:0}};return;
+    }
+    if(!hit && state.tool==='select'){
+      state.box={start:p,end:p}; if(!e.shiftKey)state.selected.clear();draw();return;
+    }
+    if(!hit)return;
+    if(!e.shiftKey && !state.selected.has(hit.s.id)){state.selected.clear();state.selected.add(hit.s.id)}else if(e.shiftKey){state.selected.has(hit.s.id)?state.selected.delete(hit.s.id):state.selected.add(hit.s.id)}
+    saveHistory(); const s=hit.s; const snapshot=JSON.parse(JSON.stringify(s));
+    if(state.selected.size>1 && state.selected.has(s.id)){
+      state.drag={kind:'move',start:p,snapshots:selectionSnapshots()};
+    }else if(s.type==='segment'){
+      if(hit.part==='body') state.drag={kind:'move',start:p,snapshots:selectionSnapshots()};
+      else if(hit.part==='a'||hit.part==='b') state.drag={kind:'resizeSeg',shape:s,part:hit.part,snapshot};
+      else state.drag={kind:'rotateSeg',shape:s,part:hit.part,snapshot};
+    }else{
+      if(hit.part==='vertex') state.drag={kind:'move',start:p,snapshots:selectionSnapshots()};
+      else state.drag={kind:'rotateAngle',shape:s,startAngle:Math.atan2(p.y-s.v.y,p.x-s.v.x),base:s.rotation};
+    }
+    draw();
+  });
+
+  canvas.addEventListener('pointermove',e=>{
+    const p=pointerPos(e);
+    if(state.box){state.box.end=p;draw();return}
+    if(!state.drag){state.hover=hitTest(p);return}
+    const d=state.drag;
+    if(d.kind==='createSegment'){d.preview.b=snapPoint(p,null);draw();return}
+    if(d.kind==='createAngle'){
+      const v={x:p.x-d.start.x,y:p.y-d.start.y};let size=Math.atan2(Math.abs(v.y),Math.abs(v.x))*2;size=clamp(size,5*Math.PI/180,Math.PI);d.preview.size=size;d.preview.rotation=Math.atan2(v.y,v.x);draw();return;
+    }
+    if(d.kind==='move'){
+      const dx=p.x-d.start.x,dy=p.y-d.start.y;
+      for(const item of d.snapshots){const s=getShape(item.id);if(s.type==='segment'){s.a.x=item.a.x+dx;s.a.y=item.a.y+dy;s.b.x=item.b.x+dx;s.b.y=item.b.y+dy}else{s.v.x=item.v.x+dx;s.v.y=item.v.y+dy}}
+      snapSelection(); updateTrash(p); draw();return;
+    }
+    if(d.kind==='resizeSeg'){
+      const s=d.shape, fixed=s.fixedLength; if(fixed)return;
+      const anchor=d.part==='a'?s.b:s.a; const orig=d.part==='a'?d.snapshot.a:d.snapshot.b; const dir=Math.atan2(orig.y-anchor.y,orig.x-anchor.x); const proj=(p.x-anchor.x)*Math.cos(dir)+(p.y-anchor.y)*Math.sin(dir); const np=pointOn(anchor,dir,Math.max(8,proj)); if(d.part==='a')Object.assign(s.a,np);else Object.assign(s.b,np);draw();return;
+    }
+    if(d.kind==='rotateSeg'){
+      const s=d.shape; const pivot=d.part==='rotateA'?s.b:s.a; const moving=d.part==='rotateA'?s.a:s.b; const len=dist(s.a,s.b); let ang=Math.atan2(p.y-pivot.y,p.x-pivot.x); ang=snapAngleToNearbyRays(pivot,ang,s.id); const np=pointOn(pivot,ang,len); Object.assign(moving,np);draw();return;
+    }
+    if(d.kind==='rotateAngle'){
+      const s=d.shape; let delta=Math.atan2(p.y-s.v.y,p.x-s.v.x)-d.startAngle; s.rotation=d.base+delta; s.rotation=snapAngleObject(s);draw();return;
+    }
+  });
+
+  canvas.addEventListener('pointerup',e=>{
+    const p=pointerPos(e); const d=state.drag;
+    if(d?.kind==='createSegment' && dist(d.preview.a,d.preview.b)>8)addSegment(d.preview.a.x,d.preview.a.y,d.preview.b.x,d.preview.b.y);
+    if(d?.kind==='createAngle')addAngle(d.start.x,d.start.y,d.preview.size*180/Math.PI,d.preview.rotation);
+    if(d?.kind==='move' && isOverTrash(p) && hasDeletableSelection()) deleteSelected();
+    state.drag=null;trash.classList.remove('hot');
+    if(state.box){
+      state.box.end=p; const b=normRect(state.box.start,state.box.end);
+      for(const s of state.shapes){if(shapeInRect(s,b))state.selected.add(s.id)} state.box=null;
+    }
+    draw();
+  });
+  canvas.addEventListener('pointercancel',()=>{state.drag=null;state.box=null;trash.classList.remove('hot');draw()});
+
+  function snapshotState(){return JSON.stringify({shapes:state.shapes,nextId:state.nextId})}
+  function saveHistory(){const snap=snapshotState();if(state.undo[state.undo.length-1]!==snap)state.undo.push(snap);if(state.undo.length>80)state.undo.shift();state.redo=[];updateHistoryButtons()}
+  function restoreSnapshot(raw){const v=JSON.parse(raw);state.shapes=v.shapes;state.nextId=v.nextId;state.selected.clear();state.drag=null;draw();updateHistoryButtons()}
+  function undo(){if(!state.undo.length)return;state.redo.push(snapshotState());restoreSnapshot(state.undo.pop())}
+  function redo(){if(!state.redo.length)return;state.undo.push(snapshotState());restoreSnapshot(state.redo.pop())}
+  function updateHistoryButtons(){document.getElementById('undoBtn').disabled=!state.undo.length;document.getElementById('redoBtn').disabled=!state.redo.length}
+
+  function selectionSnapshots(){return [...state.selected].map(id=>JSON.parse(JSON.stringify(getShape(id))))}
+  function getShape(id){return state.shapes.find(s=>s.id===id)}
+  function snapSelection(){
+    for(const id of state.selected){const s=getShape(id);if(!s)continue;for(const v of shapeVertices(s)){const n=nearestVertex(v,s.id);if(n){const dx=n.p.x-v.x,dy=n.p.y-v.y;if(s.type==='segment'){s.a.x+=dx;s.a.y+=dy;s.b.x+=dx;s.b.y+=dy}else{s.v.x+=dx;s.v.y+=dy}return}}}
+  }
+  function snapAngleToNearbyRays(pivot,ang,excludeId){
+    let best=ang,bestDiff=LINE_SNAP_DEG*Math.PI/180;
+    for(const s of state.shapes){if(s.id===excludeId)continue;let dirs=[];if(s.type==='segment'){for(const v of [s.a,s.b])if(dist(v,pivot)<SNAP+3){const other=v===s.a?s.b:s.a;dirs.push(Math.atan2(other.y-v.y,other.x-v.x))}}else if(dist(s.v,pivot)<SNAP+3)dirs.push(...rayAngles(s));
+      for(const d of dirs){const diff=Math.abs(angleNorm(d-ang));if(diff<bestDiff){bestDiff=diff;best=d}}
+    }return best;
+  }
+  function snapAngleObject(a){
+    let rot=a.rotation; const [r1,r2]=rayAngles(a); let best={diff:LINE_SNAP_DEG*Math.PI/180,rot};
+    for(const s of state.shapes){if(s.id===a.id)continue;if(s.type==='segment'){
+      for(const v of [s.a,s.b])if(dist(v,a.v)<SNAP+3){const other=v===s.a?s.b:s.a;const d=Math.atan2(other.y-v.y,other.x-v.x);for(const [r,sign] of [[r1,-1],[r2,1]]){const diff=Math.abs(angleNorm(d-r));if(diff<best.diff)best={diff,rot:d-sign*a.size/2}}}
+    }}return best.rot;
+  }
+
+  function normRect(a,b){return{x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),w:Math.abs(a.x-b.x),h:Math.abs(a.y-b.y)}}
+  function shapeInRect(s,r){return shapeVertices(s).some(p=>p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h)}
+  function isOverTrash(p){const r=trash.getBoundingClientRect(),c=canvas.getBoundingClientRect();return p.x>=r.left-c.left&&p.x<=r.right-c.left&&p.y>=r.top-c.top&&p.y<=r.bottom-c.top}
+  function hasDeletableSelection(){return [...state.selected].some(id=>{const s=getShape(id);return s&&!(state.mode==='mission'&&s.mission)})}
+  function updateTrash(p){trash.classList.toggle('hot',hasDeletableSelection()&&isOverTrash(p))}
+  function deleteSelected(){
+    state.shapes=state.shapes.filter(s=>!state.selected.has(s.id)||(state.mode==='mission'&&s.mission));
+    state.selected=new Set([...state.selected].filter(id=>{const s=getShape(id);return s&&s.mission}));
+    draw();
+  }
+
+  document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>setMode(btn.dataset.mode));
+  function setMode(mode){
+    state.mode=mode;state.shapes=[];state.selected.clear();state.tool='select';state.undo=[];state.redo=[];state.missionCompleted=false;document.getElementById('missionComplete').classList.add('hidden');updateHistoryButtons();
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+    document.getElementById('freeControls').classList.toggle('hidden',mode!=='free');
+    document.getElementById('missionControls').classList.toggle('hidden',mode!=='mission');
+    document.getElementById('angleTool').classList.toggle('hidden',mode==='mission');
+    if(mode==='mission')loadMission(state.selectedMission); else statusText.textContent='선분 또는 각을 추가해 보세요.';
+    updateToolUI();draw();
+  }
+  function setTool(t){state.tool=t;updateToolUI()}
+  function updateToolUI(){document.querySelectorAll('.tool-btn').forEach(b=>b.classList.remove('active'));const map={select:'selectTool',segment:'segmentTool',angle:'angleTool'};if(map[state.tool])document.getElementById(map[state.tool]).classList.add('active')}
+  document.getElementById('selectTool').onclick=()=>setTool('select');
+  document.getElementById('segmentTool').onclick=()=>setTool('segment');
+  document.getElementById('angleTool').onclick=()=>setTool('angle');
+  document.getElementById('undoBtn').onclick=undo;
+  document.getElementById('redoBtn').onclick=redo;
+  document.getElementById('clearBtn').onclick=()=>{saveHistory();state.shapes=[];state.selected.clear();if(state.mode==='mission')loadMission(state.selectedMission);draw()};
+  window.addEventListener('keydown',e=>{if((e.key==='Delete'||e.key==='Backspace')&&state.selected.size&&hasDeletableSelection()){saveHistory();deleteSelected()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}});
+  document.getElementById('addSegmentByValue').onclick=()=>{saveHistory();const v=clamp(parseFloat(document.getElementById('lengthInput').value)||5,.1,10);const y=120+Math.random()*Math.max(50,H-240);addSegment(W/2-v*pxPerUnit/2,y,W/2+v*pxPerUnit/2,y);draw()};
+  document.getElementById('addAngleByValue').onclick=()=>{saveHistory();const v=clamp(parseFloat(document.getElementById('angleInput').value)||60,1,179);addAngle(W/2,H/2,v,0);draw()};
+  document.getElementById('newMission').onclick=()=>loadMission(state.selectedMission);
+  document.getElementById('anotherProblem').onclick=()=>loadMission(state.selectedMission);
+  document.getElementById('anotherMission').onclick=()=>{let next=state.selectedMission;while(next===state.selectedMission)next=Math.floor(Math.random()*5);state.selectedMission=next;loadMission(next)};
+  document.querySelectorAll('.mission-choice').forEach(btn=>btn.onclick=()=>{state.selectedMission=Number(btn.dataset.mission);document.querySelectorAll('.mission-choice').forEach(b=>b.classList.toggle('active',b===btn));loadMission(state.selectedMission)});
+
+  const missionBanks=[
+    Array.from({length:10},(_,i)=>({type:0,sides:[[3.2,4.1,5],[4,4.8,6.2],[2.8,3.6,4.9],[5,5.5,7],[3.5,3.5,5.8],[4.2,6,7.1],[2.6,4.7,5.3],[3.8,5.4,6.4],[4.4,4.9,7.2],[3,5,6.3]][i]})),
+    Array.from({length:10},(_,i)=>({type:1,data:[[4,5,60],[3.5,5.2,45],[4.4,4.8,75],[3.2,6,50],[5,5,80],[4.5,6.2,35],[2.8,4.6,100],[3.6,5.5,65],[4.9,6.5,55],[3.3,4.7,120]][i]})),
+    Array.from({length:10},(_,i)=>({type:2,data:[[5,50,60],[4.5,45,70],[6,35,80],[4.2,55,65],[5.5,40,75],[3.8,60,50],[6.2,30,95],[4.8,70,45],[5.1,52,68],[3.9,48,82]][i]})),
+    Array.from({length:10},(_,i)=>({type:3,sides:[[2.5,3,6],[3,4,7.5],[2,2.8,5.5],[4,4.5,9],[3.2,3.6,7.2],[2.7,4.1,7],[3.5,5,9],[2.4,3.3,6.2],[4.2,5.1,9.8],[3.8,4,8.5]][i]})),
+    // SSA의 두 삼각형 조건: A는 예각이고, h=b·sin(A) < a < b.
+    Array.from({length:10},(_,i)=>({type:4,data:[[3.4,5.0,30],[3.8,5.5,35],[4.2,6.0,32],[4.5,6.2,40],[3.2,4.8,28],[4.0,5.8,38],[3.6,5.2,34],[4.8,6.5,42],[3.0,4.6,27],[4.4,6.1,36]][i]}))
+  ];
+
+  function loadMission(type=state.selectedMission){
+    state.shapes=[];state.selected.clear();state.tool='select';state.missionCompleted=false;document.getElementById('missionComplete').classList.add('hidden');updateToolUI();
+    state.selectedMission=type;document.querySelectorAll('.mission-choice').forEach(b=>b.classList.toggle('active',Number(b.dataset.mission)===type));
+    const bank=missionBanks[type], idx=Math.floor(Math.random()*bank.length), m=bank[idx];state.missionType=type;
+    const cx=Math.max(250,W*.38), cy=Math.max(250,H*.48);
+    if(type===0||type===3){
+      const [a,b,c]=m.sides;addSegment(cx-180,cy-110,cx-180+a*pxPerUnit,cy-110,{mission:true,fixedLength:true,label:'a'});addSegment(cx-170,cy,cx-170+b*pxPerUnit,cy,{mission:true,fixedLength:true,label:'b'});addSegment(cx-160,cy+110,cx-160+c*pxPerUnit,cy+110,{mission:true,fixedLength:true,label:'c'});
+    } else if(type===1){
+      const [b,c,A]=m.data;addSegment(cx-180,cy-70,cx-180+b*pxPerUnit,cy-70,{mission:true,fixedLength:true,label:'b'});addSegment(cx-180,cy+60,cx-180+c*pxPerUnit,cy+60,{mission:true,fixedLength:true,label:'c'});addAngle(cx+130,cy,A,0,{mission:true,label:'A'});
+    } else if(type===2){
+      const [c,A,B]=m.data;addSegment(cx-180,cy,cx-180+c*pxPerUnit,cy,{mission:true,fixedLength:true,label:'c'});addAngle(cx+120,cy-60,A,0,{mission:true,label:'A'});addAngle(cx+120,cy+80,B,0,{mission:true,label:'B'});
+    } else {
+      const [a,b,A]=m.data;addSegment(cx-180,cy-70,cx-180+a*pxPerUnit,cy-70,{mission:true,fixedLength:true,label:'a'});addSegment(cx-180,cy+60,cx-180+b*pxPerUnit,cy+60,{mission:true,fixedLength:true,label:'b'});addAngle(cx+130,cy,A,0,{mission:true,label:'A'});
+    }
+    statusText.textContent='주어진 도형을 움직여 삼각형을 만들어 보세요.';draw();
+  }
+
+  updateToolUI();updateHistoryButtons();resize();setMode('mission');
+})();
+</script>
+</body>
+</html>
