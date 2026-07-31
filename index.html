@@ -84,12 +84,25 @@
   .tutorial-dot{width:9px;height:9px;border-radius:50%;background:#cbd5e1}
   .tutorial-dot.active{background:#2563eb}
   .tutorial-page.hidden{display:none!important}
+  .game-top{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:7;display:flex;align-items:center;gap:8px;padding:7px 9px;background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:15px;box-shadow:0 4px 14px rgba(15,23,42,.08)}
+  .game-role-btn{height:36px;border:1px solid var(--border);background:#fff;border-radius:10px;padding:0 12px;font-weight:800;cursor:pointer;color:#475569}
+  .game-role-btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
+  .game-number{width:72px!important;height:36px;padding:4px 8px!important}
+  .game-start,.game-submit{height:36px;border:0;border-radius:10px;padding:0 14px;font-weight:800;cursor:pointer;color:#fff}
+  .game-start{background:#0f766e}.game-submit{background:#7c3aed}.game-submit:disabled{opacity:.45;cursor:not-allowed}
+  .stopwatch{min-width:82px;text-align:center;font-variant-numeric:tabular-nums;font-weight:900;color:#0f172a;background:#f1f5f9;border-radius:10px;padding:8px 10px}
+  .game-message{position:absolute;top:68px;left:50%;transform:translateX(-50%);z-index:8;min-width:280px;max-width:480px;padding:12px 16px;border-radius:14px;background:rgba(255,255,255,.98);border:2px solid #93c5fd;text-align:center;font-weight:800;box-shadow:0 8px 20px rgba(15,23,42,.13)}
+  .game-message.success{border-color:#86efac;color:#15803d}.game-message.error{border-color:#fca5a5;color:#dc2626}
+  .game-reference{position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;background:#fff;padding:90px 30px 30px}
+  .reference-card{width:min(760px,92%);height:min(560px,86%);border:1px solid var(--border);border-radius:22px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+  .reference-card svg{width:88%;height:78%;overflow:visible}
+  .reference-title{font-size:19px;font-weight:900}.reference-note{font-size:13px;color:var(--muted)}
   .hidden{display:none!important}
   @media (max-width:850px){#app{grid-template-columns:154px 1fr}.title{font-size:17px}.status{display:none}}
 </style>
 </head>
 <body>
-<div class="tutorial-overlay" id="tutorialOverlay">
+<div class="tutorial-overlay hidden" id="tutorialOverlay">
   <div class="tutorial-card" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle">
     <section class="tutorial-page" data-page="0">
       <div class="tutorial-visual">
@@ -138,12 +151,58 @@
     </section>
   </div>
 </div>
+<div class="tutorial-overlay hidden" id="gameTutorialOverlay">
+  <div class="tutorial-card" role="dialog" aria-modal="true" aria-labelledby="gameTutorialTitle">
+    <section class="tutorial-page game-tutorial-page" data-game-page="0">
+      <div class="tutorial-visual">
+        <svg viewBox="0 0 520 230" role="img" aria-label="설명 팀이 삼각형의 정보를 보고 전달하는 모습">
+          <rect x="18" y="18" width="484" height="194" rx="20" fill="white"/>
+          <path d="M120 168 L270 48 L410 168 Z" fill="rgba(37,99,235,.12)" stroke="#2563eb" stroke-width="6" stroke-linejoin="round"/>
+          <g font-size="17" font-weight="800" fill="#172033">
+            <text x="255" y="37">A = 58°</text><text x="74" y="171">B = 67°</text><text x="414" y="171">C = 55°</text>
+            <text x="338" y="102">a = 5.2</text><text x="165" y="103">b = 4.8</text><text x="238" y="195">c = 6.0</text>
+          </g>
+          <path d="M78 72 C45 84 42 120 66 139" fill="none" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+          <path d="M61 129 L67 140 L78 135" fill="none" stroke="#64748b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="tutorial-body">
+        <h2 id="gameTutorialTitle">설명 팀</h2>
+        <p>문제 번호를 선택하면 세 변의 길이와 세 각의 크기가 표시된 삼각형을 볼 수 있어요.</p>
+        <p>화면을 보여 주지 않고 <strong>말로만</strong> 작도 팀에게 조건을 전달해 보세요.</p>
+        <div class="tutorial-actions"><button class="tutorial-btn primary" id="gameTutorialNext">다음</button></div>
+        <div class="tutorial-dots" aria-hidden="true"><span class="tutorial-dot active"></span><span class="tutorial-dot"></span></div>
+      </div>
+    </section>
+    <section class="tutorial-page game-tutorial-page hidden" data-game-page="1">
+      <div class="tutorial-visual">
+        <svg viewBox="0 0 520 230" role="img" aria-label="작도 팀이 시작 도형에서 삼각형을 완성하고 제출하는 모습">
+          <rect x="18" y="18" width="484" height="194" rx="20" fill="white"/>
+          <path d="M112 165 L255 60" stroke="#111827" stroke-width="7" stroke-linecap="round"/>
+          <path d="M255 60 L407 165" stroke="#2563eb" stroke-width="7" stroke-linecap="round" stroke-dasharray="12 9"/>
+          <path d="M407 165 L112 165" stroke="#2563eb" stroke-width="7" stroke-linecap="round" stroke-dasharray="12 9"/>
+          <circle cx="112" cy="165" r="8" fill="white" stroke="#111827" stroke-width="4"/><circle cx="255" cy="60" r="8" fill="white" stroke="#111827" stroke-width="4"/>
+          <rect x="199" y="185" width="122" height="30" rx="11" fill="#7c3aed"/><text x="260" y="206" text-anchor="middle" font-size="16" font-weight="800" fill="white">제출</text>
+          <text x="260" y="34" text-anchor="middle" font-size="20" font-weight="900" fill="#0f172a">00:18.4</text>
+        </svg>
+      </div>
+      <div class="tutorial-body">
+        <h2>작도 팀</h2>
+        <p>같은 문제 번호를 고르고 <strong>시작</strong>을 누르면 고정된 한 변 또는 한 각과 함께 시간이 시작돼요.</p>
+        <p>설명을 듣고 삼각형을 완성한 뒤 <strong>제출</strong>하세요. 더 빠른 기록에 도전해 보세요.</p>
+        <div class="tutorial-actions"><button class="tutorial-btn secondary" id="gameTutorialPrev">이전</button><button class="tutorial-btn primary" id="gameTutorialStart">게임 시작</button></div>
+        <div class="tutorial-dots" aria-hidden="true"><span class="tutorial-dot"></span><span class="tutorial-dot active"></span></div>
+      </div>
+    </section>
+  </div>
+</div>
 <div id="app">
   <header>
     <div class="title">△ 삼각형 결정조건 탐구</div>
     <div class="mode-tabs">
-      <button class="tab active" data-mode="mission">미션 모드</button>
-      <button class="tab" data-mode="free">자유 모드</button>
+      <button class="tab active" data-mode="free">자유 모드</button>
+      <button class="tab" data-mode="game">게임 모드</button>
+      <button class="tab" data-mode="mission">미션 모드</button>
     </div>
     <div class="status" id="statusText">선분 또는 각을 추가해 보세요.</div>
   </header>
@@ -179,6 +238,22 @@
       </div>
       <button class="mission-btn" id="newMission" title="새 문제" aria-label="새 문제">⟳</button>
     </div>
+    <div class="game-top hidden" id="gameControls">
+      <button class="game-role-btn active" data-role="explain">설명 팀</button>
+      <button class="game-role-btn" data-role="build">작도 팀</button>
+      <input class="game-number" id="gameProblemNumber" type="number" min="1" max="100" value="1" aria-label="문제 번호">
+      <button class="game-start" id="gameStart">시작</button>
+      <div class="stopwatch" id="stopwatch">00:00.0</div>
+      <button class="game-submit" id="gameSubmit" disabled>제출</button>
+    </div>
+    <div class="game-message hidden" id="gameMessage"></div>
+    <div class="game-reference hidden" id="gameReference">
+      <div class="reference-card">
+        <div class="reference-title" id="referenceTitle">1번 문제</div>
+        <svg id="referenceSvg" viewBox="0 0 700 460" role="img" aria-label="세 변의 길이와 세 각의 크기가 표시된 삼각형"></svg>
+        <div class="reference-note">설명 팀만 화면을 보고 작도 팀에게 말로 전달하세요.</div>
+      </div>
+    </div>
     <canvas id="canvas"></canvas>
     <button class="help-btn" id="tutorialHelp" title="튜토리얼 다시 보기" aria-label="튜토리얼 다시 보기">?</button>
     <div class="mission-complete hidden" id="missionComplete">
@@ -203,10 +278,10 @@
 
   const state = {
     mode:'mission', tool:'select', shapes:[], selected:new Set(),
-    drag:null, hover:null, box:null, nextId:1, missionType:1, selectedMission:1, undo:[], redo:[], missionCompleted:false, mission5Solutions:[]
+    drag:null, hover:null, box:null, nextId:1, missionType:1, selectedMission:1, undo:[], redo:[], missionCompleted:false, mission5Solutions:[], gameRole:'explain', gameProblem:1, gameTarget:null, gameStarted:false, gameStartTime:0, gameElapsed:0, gameTimer:null, gameFeedback:null
   };
-  const palette={segment:'#0ea5e9',angle:'#f59e0b',mission:'#111111',selected:'#ef4444'};
-  const SNAP=16, CLOSE_TOL=13, LINE_SNAP_DEG=6;
+  const palette={segment:'#0ea5e9',angle:'#f59e0b',specified:'#16a34a',mission:'#111111',selected:'#ef4444'};
+  const SNAP=16, CLOSE_TOL=13, LINE_SNAP_DEG=6, CREATE_RAY_SNAP_DEG=10;
   const pxPerUnit=38;
 
   function resize(){
@@ -225,11 +300,11 @@
   const pointOn=(p,ang,len)=>({x:p.x+Math.cos(ang)*len,y:p.y+Math.sin(ang)*len});
 
   function addSegment(x1,y1,x2,y2,opt={}){
-    const s={id:uid(),type:'segment',a:{x:x1,y:y1},b:{x:x2,y:y2},fixedLength:!!opt.fixedLength,mission:!!opt.mission,label:opt.label||'',lockedAngle:false};
+    const s={id:uid(),type:'segment',a:{x:x1,y:y1},b:{x:x2,y:y2},fixedLength:!!opt.fixedLength,mission:!!opt.mission,specified:!!opt.specified,label:opt.label||'',lockedAngle:false,locked:!!opt.locked,starter:!!opt.starter};
     state.shapes.push(s); return s;
   }
   function addAngle(x,y,sizeDeg=60,rotation=0,opt={}){
-    const a={id:uid(),type:'angle',v:{x,y},size:clamp(sizeDeg,1,179)*Math.PI/180,rotation,mission:!!opt.mission,label:opt.label||''};
+    const a={id:uid(),type:'angle',v:{x,y},size:clamp(sizeDeg,1,179)*Math.PI/180,rotation,mission:!!opt.mission,specified:!!opt.specified,label:opt.label||'',locked:!!opt.locked,starter:!!opt.starter};
     state.shapes.push(a); return a;
   }
 
@@ -244,6 +319,15 @@
     for(const s of state.shapes){
       if(s.id===excludeId) continue;
       shapeVertices(s).forEach((v,i)=>{const d=dist(p,v);if(d<SNAP && (!best||d<best.d))best={shape:s,index:i,p:v,d}})
+    }
+    return best;
+  }
+  function nearestAngleVertex(p){
+    let best=null;
+    for(const s of state.shapes){
+      if(s.type!=='angle')continue;
+      const d=dist(p,s.v);
+      if(d<SNAP+4&&(!best||d<best.d))best={shape:s,p:s.v,d};
     }
     return best;
   }
@@ -352,10 +436,18 @@
     return common!==undefined&&vi===common;
   }
   function mission5SolutionValue(t){
-    // 주어진 a, b가 아닌 세 번째 변의 길이를 이용해 두 SSA 해를 구별한다.
-    const unknown=t.trio.find(s=>!s.mission);
-    if(!unknown)return null;
-    return dist(unknown.a,unknown.b)/pxPerUnit;
+    // SSA의 두 해는 각 C의 크기가 서로 다르므로, C의 크기로 두 삼각형을 구별한다.
+    // C는 사용자가 만든 세 번째 변 c의 대각이다.
+    const unknownIndex=t.trio.findIndex(s=>!s.mission);
+    if(unknownIndex<0)return null;
+    const cSide=t.edgeVertices[unknownIndex];
+    if(!cSide)return null;
+    const cVertex=[0,1,2].find(v=>!cSide.includes(v));
+    if(cVertex===undefined)return null;
+    const others=[0,1,2].filter(v=>v!==cVertex);
+    const p=t.vertices[cVertex],p1=t.vertices[others[0]],p2=t.vertices[others[1]];
+    const d1=Math.atan2(p1.y-p.y,p1.x-p.x),d2=Math.atan2(p2.y-p.y,p2.x-p.x);
+    return Math.abs(angleNorm(d1-d2))*180/Math.PI;
   }
   function updateMissionComplete(message,showActions,tone='success'){
     const complete=document.getElementById('missionComplete');
@@ -371,6 +463,16 @@
   }
   function drawCompletedTriangles(){
     const triangles=findCompletedTriangles();
+    if(state.mode==='game'){
+      for(const t of triangles){
+        const [a,b,c]=t.vertices;ctx.save();
+        const ok=state.gameFeedback?.success&&state.gameFeedback.triangle===t;
+        ctx.fillStyle=ok?'rgba(34,197,94,.22)':'rgba(59,130,246,.10)';
+        ctx.strokeStyle=ok?'rgba(22,163,74,.8)':'rgba(59,130,246,.35)';
+        ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.lineTo(c.x,c.y);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+      }
+      return;
+    }
     const wrongIncluded=triangles.filter(mission5UsesWrongIncludedAngle);
     for(const t of triangles){
       const [a,b,c]=t.vertices;
@@ -387,7 +489,7 @@
       for(const t of matches){
         const value=mission5SolutionValue(t);
         if(value===null)continue;
-        const isNew=state.mission5Solutions.every(v=>Math.abs(v-value)>0.18);
+        const isNew=state.mission5Solutions.every(v=>Math.abs(v-value)>=5);
         if(isNew)state.mission5Solutions.push(value);
       }
       if(state.mission5Solutions.length>=2){
@@ -413,19 +515,43 @@
     for(let y=0;y<H;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
     ctx.restore();
   }
+  function showMeasurements(){
+    return state.mode==='free'||(state.mode==='game'&&state.gameRole==='build');
+  }
+  function formatLength(px){
+    const value=px/pxPerUnit;
+    return `${value.toFixed(1).replace(/\.0$/,'')}`;
+  }
+  function drawMeasureBadge(text,x,y,color){
+    ctx.save();
+    ctx.font='800 14px sans-serif';
+    const padX=7,padY=5,w=ctx.measureText(text).width+padX*2,h=25;
+    const bx=x-w/2,by=y-h/2;
+    ctx.fillStyle='rgba(255,255,255,.94)';ctx.strokeStyle=color;ctx.lineWidth=1.5;
+    ctx.beginPath();
+    if(ctx.roundRect)ctx.roundRect(bx,by,w,h,8);else ctx.rect(bx,by,w,h);
+    ctx.fill();ctx.stroke();
+    ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,x,y+0.5);
+    ctx.restore();
+  }
   function drawShape(s){
-    const selected=state.selected.has(s.id), color=s.mission?palette.mission:(s.type==='segment'?palette.segment:palette.angle);
+    const selected=state.selected.has(s.id), color=(s.mission||s.starter)?palette.mission:(s.specified?palette.specified:(s.type==='segment'?palette.segment:palette.angle));
     ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round';
     if(s.type==='segment'){
       ctx.strokeStyle=selected?palette.selected:color; ctx.lineWidth=selected?5:4;
       ctx.beginPath();ctx.moveTo(s.a.x,s.a.y);ctx.lineTo(s.b.x,s.b.y);ctx.stroke();
       [s.a,s.b].forEach(p=>drawPoint(p,selected?palette.selected:color,7));
+      const ang=Math.atan2(s.b.y-s.a.y,s.b.x-s.a.x); const len=dist(s.a,s.b);
       if(selected){
-        const ang=Math.atan2(s.b.y-s.a.y,s.b.x-s.a.x); const len=dist(s.a,s.b);
         const h1=pointOn(s.a,ang+Math.PI,20),h2=pointOn(s.b,ang,20);
         drawRotateHandle(h1);drawRotateHandle(h2);
       }
       if(s.label){ctx.fillStyle=color;ctx.font='700 15px sans-serif';ctx.fillText(s.label,(s.a.x+s.b.x)/2+8,(s.a.y+s.b.y)/2-8)}
+      if(showMeasurements()){
+        const mx=(s.a.x+s.b.x)/2,my=(s.a.y+s.b.y)/2;
+        const nx=-Math.sin(ang),ny=Math.cos(ang);
+        drawMeasureBadge(formatLength(len),mx+nx*22,my+ny*22,selected?palette.selected:color);
+      }
     } else {
       const [r1,r2]=rayAngles(s), L=80;
       ctx.strokeStyle=selected?palette.selected:color;ctx.lineWidth=3;ctx.setLineDash([8,6]);
@@ -434,18 +560,40 @@
       ctx.strokeStyle=selected?palette.selected:color;ctx.lineWidth=2;
       ctx.beginPath();ctx.arc(s.v.x,s.v.y,27,r1,r2);ctx.stroke();
       if(s.label){ctx.fillStyle=color;ctx.font='700 15px sans-serif';ctx.fillText(s.label,s.v.x+12,s.v.y-12)}
+      if(showMeasurements()){
+        const pos=pointOn(s.v,s.rotation,48);
+        drawMeasureBadge(`${Math.round(s.size*180/Math.PI)}°`,pos.x,pos.y,selected?palette.selected:color);
+      }
     }
     ctx.restore();
   }
   function drawPoint(p,c,r){ctx.save();ctx.fillStyle='#fff';ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore()}
   function drawRotateHandle(p){ctx.save();ctx.fillStyle='#fff';ctx.strokeStyle='#ef4444';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.font='10px sans-serif';ctx.fillStyle='#ef4444';ctx.fillText('↻',p.x-5,p.y+4);ctx.restore()}
   function drawSelectionBox(){const b=normRect(state.box.start,state.box.end);ctx.save();ctx.fillStyle='rgba(37,99,235,.08)';ctx.strokeStyle='#2563eb';ctx.setLineDash([5,4]);ctx.fillRect(b.x,b.y,b.w,b.h);ctx.strokeRect(b.x,b.y,b.w,b.h);ctx.restore()}
-  function drawPreview(p){ctx.save();ctx.globalAlpha=.65;if(p.type==='segment'){ctx.strokeStyle=palette.segment;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(p.a.x,p.a.y);ctx.lineTo(p.b.x,p.b.y);ctx.stroke()}else{const [r1,r2]=rayAngles(p);ctx.strokeStyle=palette.angle;ctx.setLineDash([8,6]);for(const r of [r1,r2]){const e=pointOn(p.v,r,80);ctx.beginPath();ctx.moveTo(p.v.x,p.v.y);ctx.lineTo(e.x,e.y);ctx.stroke()}}ctx.restore()}
+  function drawPreview(p){
+    ctx.save();ctx.globalAlpha=.72;
+    if(p.type==='segment'){
+      ctx.strokeStyle=palette.segment;ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(p.a.x,p.a.y);ctx.lineTo(p.b.x,p.b.y);ctx.stroke();
+      if(showMeasurements()){
+        const ang=Math.atan2(p.b.y-p.a.y,p.b.x-p.a.x),mx=(p.a.x+p.b.x)/2,my=(p.a.y+p.b.y)/2;
+        drawMeasureBadge(formatLength(dist(p.a,p.b)),mx-Math.sin(ang)*22,my+Math.cos(ang)*22,palette.segment);
+      }
+    }else{
+      const [r1,r2]=rayAngles(p);ctx.strokeStyle=palette.angle;ctx.setLineDash([8,6]);
+      for(const r of [r1,r2]){const e=pointOn(p.v,r,80);ctx.beginPath();ctx.moveTo(p.v.x,p.v.y);ctx.lineTo(e.x,e.y);ctx.stroke()}
+      ctx.setLineDash([]);ctx.beginPath();ctx.arc(p.v.x,p.v.y,27,r1,r2);ctx.stroke();
+      if(showMeasurements()){
+        const pos=pointOn(p.v,p.rotation,48);drawMeasureBadge(`${Math.round(p.size*180/Math.PI)}°`,pos.x,pos.y,palette.angle);
+      }
+    }
+    ctx.restore();
+  }
 
   function pointerPos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
   function hitTest(p){
     for(let i=state.shapes.length-1;i>=0;i--){
       const s=state.shapes[i];
+      if(s.locked) continue;
       if(s.type==='segment'){
         const ang=Math.atan2(s.b.y-s.a.y,s.b.x-s.a.x);
         if(state.selected.has(s.id)){
@@ -465,17 +613,19 @@
   canvas.addEventListener('pointerdown',e=>{
     canvas.setPointerCapture(e.pointerId); const p=pointerPos(e); const hit=hitTest(p);
     if(state.tool==='segment'){
+      if(state.mode==='game'&&(!state.gameStarted||state.gameRole!=='build'))return;
       saveHistory();
-      const startSnap=nearestVertex(p,null);
+      const angleStart=nearestAngleVertex(p);
+      const startSnap=angleStart||nearestVertex(p,null);
       const sp=startSnap?{x:startSnap.p.x,y:startSnap.p.y}:{x:p.x,y:p.y};
       state.drag={
         kind:'createSegment',start:sp,
-        angleAnchor:startSnap?.shape?.type==='angle'?startSnap.shape.id:null,
+        angleAnchor:angleStart?angleStart.shape.id:(startSnap?.shape?.type==='angle'?startSnap.shape.id:null),
         preview:{type:'segment',a:sp,b:{x:sp.x,y:sp.y}}
       };
       return;
     }
-    if(state.tool==='angle' && state.mode==='free'){
+    if(state.tool==='angle' && (state.mode==='free'||(state.mode==='game'&&state.gameRole==='build'&&state.gameStarted))){
       saveHistory(); state.drag={kind:'createAngle',start:p,preview:{type:'angle',v:p,size:Math.PI/3,rotation:0}};return;
     }
     if(!hit && state.tool==='select'){
@@ -509,7 +659,7 @@
         if(angleShape){
           const len=Math.max(0,dist(d.start,end));
           const rawAng=Math.atan2(end.y-d.start.y,end.x-d.start.x);
-          let bestAng=rawAng,bestDiff=LINE_SNAP_DEG*Math.PI/180;
+          let bestAng=rawAng,bestDiff=CREATE_RAY_SNAP_DEG*Math.PI/180;
           for(const ray of rayAngles(angleShape)){
             const diff=Math.abs(angleNorm(ray-rawAng));
             if(diff<bestDiff){bestDiff=diff;bestAng=ray}
@@ -583,23 +733,32 @@
   function normRect(a,b){return{x:Math.min(a.x,b.x),y:Math.min(a.y,b.y),w:Math.abs(a.x-b.x),h:Math.abs(a.y-b.y)}}
   function shapeInRect(s,r){return shapeVertices(s).some(p=>p.x>=r.x&&p.x<=r.x+r.w&&p.y>=r.y&&p.y<=r.y+r.h)}
   function isOverTrash(p){const r=trash.getBoundingClientRect(),c=canvas.getBoundingClientRect();return p.x>=r.left-c.left&&p.x<=r.right-c.left&&p.y>=r.top-c.top&&p.y<=r.bottom-c.top}
-  function hasDeletableSelection(){return [...state.selected].some(id=>{const s=getShape(id);return s&&!(state.mode==='mission'&&s.mission)})}
+  function hasDeletableSelection(){return [...state.selected].some(id=>{const s=getShape(id);return s&&!((state.mode==='mission'&&s.mission)||(state.mode==='game'&&s.starter))})}
   function updateTrash(p){trash.classList.toggle('hot',hasDeletableSelection()&&isOverTrash(p))}
   function deleteSelected(){
-    state.shapes=state.shapes.filter(s=>!state.selected.has(s.id)||(state.mode==='mission'&&s.mission));
-    state.selected=new Set([...state.selected].filter(id=>{const s=getShape(id);return s&&s.mission}));
+    state.shapes=state.shapes.filter(s=>!state.selected.has(s.id)||(state.mode==='mission'&&s.mission)||(state.mode==='game'&&s.starter));
+    state.selected=new Set([...state.selected].filter(id=>{const s=getShape(id);return s&&(s.mission||s.starter)}));
     draw();
   }
 
-  document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>setMode(btn.dataset.mode));
+  document.querySelectorAll('.tab').forEach(btn=>btn.onclick=()=>{setMode(btn.dataset.mode);if(btn.dataset.mode==='mission')openMissionTutorial();else if(btn.dataset.mode==='game')openGameTutorial();});
   function setMode(mode){
-    state.mode=mode;state.shapes=[];state.selected.clear();state.tool='select';state.undo=[];state.redo=[];state.missionCompleted=false;state.mission5Solutions=[];document.getElementById('missionComplete').classList.add('hidden');updateHistoryButtons();
+    state.mode=mode;if(mode!=='game')state.gameStarted=false;state.shapes=[];state.selected.clear();state.tool='select';state.undo=[];state.redo=[];state.missionCompleted=false;state.mission5Solutions=[];document.getElementById('missionComplete').classList.add('hidden');updateHistoryButtons();
     document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
-    document.getElementById('freeControls').classList.toggle('hidden',mode!=='free');
+    stopGameTimer();
+    document.getElementById('freeControls').classList.toggle('hidden',mode==='mission'||(mode==='game'&&state.gameRole==='explain'));
     document.getElementById('missionControls').classList.toggle('hidden',mode!=='mission');
-    document.getElementById('tutorialHelp').classList.toggle('hidden',mode!=='mission');
-    document.getElementById('angleTool').classList.toggle('hidden',mode==='mission');
-    if(mode==='mission')loadMission(state.selectedMission); else statusText.textContent='선분 또는 각을 추가해 보세요.';
+    document.getElementById('gameControls').classList.toggle('hidden',mode!=='game');
+    document.getElementById('gameReference').classList.toggle('hidden',mode!=='game'||state.gameRole!=='explain');
+    document.getElementById('gameMessage').classList.add('hidden');
+    document.getElementById('tutorialHelp').classList.toggle('hidden',mode!=='mission'&&mode!=='game');
+    document.getElementById('angleTool').classList.toggle('hidden',mode==='mission'||(mode==='game'&&state.gameRole==='explain'));
+    document.getElementById('segmentTool').classList.toggle('hidden',mode==='game'&&state.gameRole==='explain');
+    document.getElementById('selectTool').classList.toggle('hidden',mode==='game'&&state.gameRole==='explain');
+    trash.classList.toggle('hidden',mode==='game'&&state.gameRole==='explain');
+    if(mode==='mission')loadMission(state.selectedMission);
+    else if(mode==='game'){state.gameProblem=clamp(parseInt(document.getElementById('gameProblemNumber').value)||1,1,100);state.gameTarget=generateGameProblem(state.gameProblem);renderGameReference();setGameRole(state.gameRole,false);}
+    else statusText.textContent='선분 또는 각을 추가해 보세요.';
     updateToolUI();draw();
   }
   function setTool(t){state.tool=t;updateToolUI()}
@@ -609,14 +768,111 @@
   document.getElementById('angleTool').onclick=()=>setTool('angle');
   document.getElementById('undoBtn').onclick=undo;
   document.getElementById('redoBtn').onclick=redo;
-  document.getElementById('clearBtn').onclick=()=>{saveHistory();state.shapes=[];state.selected.clear();if(state.mode==='mission')loadMission(state.selectedMission);draw()};
+  document.getElementById('clearBtn').onclick=()=>{saveHistory();state.shapes=[];state.selected.clear();if(state.mode==='mission')loadMission(state.selectedMission);else if(state.mode==='game'&&state.gameStarted)startGameProblem();draw()};
   window.addEventListener('keydown',e=>{if((e.key==='Delete'||e.key==='Backspace')&&state.selected.size&&hasDeletableSelection()){saveHistory();deleteSelected()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo()}if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}});
-  document.getElementById('addSegmentByValue').onclick=()=>{saveHistory();const v=clamp(parseFloat(document.getElementById('lengthInput').value)||5,.1,10);const y=120+Math.random()*Math.max(50,H-240);addSegment(W/2-v*pxPerUnit/2,y,W/2+v*pxPerUnit/2,y);setTool('select');draw()};
-  document.getElementById('addAngleByValue').onclick=()=>{saveHistory();const v=clamp(parseFloat(document.getElementById('angleInput').value)||60,1,179);addAngle(W/2,H/2,v,0);setTool('select');draw()};
+  document.getElementById('addSegmentByValue').onclick=()=>{saveHistory();const v=clamp(parseFloat(document.getElementById('lengthInput').value)||5,.1,10);const y=120+Math.random()*Math.max(50,H-240);addSegment(W/2-v*pxPerUnit/2,y,W/2+v*pxPerUnit/2,y,{specified:true,fixedLength:true});setTool('select');draw()};
+  document.getElementById('addAngleByValue').onclick=()=>{saveHistory();const v=clamp(parseFloat(document.getElementById('angleInput').value)||60,1,179);addAngle(W/2,H/2,v,0,{specified:true});setTool('select');draw()};
   document.getElementById('newMission').onclick=()=>loadMission(state.selectedMission);
   document.getElementById('anotherProblem').onclick=()=>loadMission(state.selectedMission);
   document.getElementById('anotherMission').onclick=()=>{let next=state.selectedMission;while(next===state.selectedMission)next=Math.floor(Math.random()*5);state.selectedMission=next;loadMission(next)};
   document.querySelectorAll('.mission-choice').forEach(btn=>btn.onclick=()=>{state.selectedMission=Number(btn.dataset.mission);document.querySelectorAll('.mission-choice').forEach(b=>b.classList.toggle('active',b===btn));loadMission(state.selectedMission)});
+
+
+  function seededRandom(seed){
+    let x=(seed*9301+49297)%233280;
+    return()=>{x=(x*9301+49297)%233280;return x/233280};
+  }
+  function triangleAngles(a,b,c){
+    const A=Math.acos(clamp((b*b+c*c-a*a)/(2*b*c),-1,1))*180/Math.PI;
+    const B=Math.acos(clamp((a*a+c*c-b*b)/(2*a*c),-1,1))*180/Math.PI;
+    return [A,B,180-A-B];
+  }
+  function generateGameProblem(n){
+    const r=seededRandom(n);
+    const b=+(3.4+r()*3.0).toFixed(1),c=+(3.4+r()*3.0).toFixed(1),A=+(38+r()*70).toFixed(0);
+    const a=+Math.sqrt(b*b+c*c-2*b*c*Math.cos(A*Math.PI/180)).toFixed(1);
+    const exactAngles=triangleAngles(a,b,c),AA=Math.round(exactAngles[0]),BB=Math.round(exactAngles[1]),CC=180-AA-BB;
+    const starterType=n%2===0?'angle':'segment';
+    const labelIndex=Math.floor(r()*3);
+    return{number:n,sides:[a,b,c],angles:[AA,BB,CC],starterType,starterIndex:labelIndex};
+  }
+  function renderGameReference(){
+    if(!state.gameTarget)return;
+    const t=state.gameTarget,svg=document.getElementById('referenceSvg');
+    document.getElementById('referenceTitle').textContent=`${t.number}번 문제`;
+    const [a,b,c]=t.sides,[A,B,C]=t.angles;
+    const scale=Math.min(330/c,260/b);
+    const P={x:150,y:360},Q={x:150+c*scale,y:360},R={x:150+b*scale*Math.cos(A*Math.PI/180),y:360-b*scale*Math.sin(A*Math.PI/180)};
+    const mid=(u,v)=>({x:(u.x+v.x)/2,y:(u.y+v.y)/2});
+    const ma=mid(Q,R),mb=mid(P,R),mc=mid(P,Q);
+    svg.innerHTML=`
+      <path d="M ${P.x} ${P.y} L ${Q.x} ${Q.y} L ${R.x} ${R.y} Z" fill="rgba(37,99,235,.12)" stroke="#2563eb" stroke-width="7" stroke-linejoin="round"/>
+      <circle cx="${P.x}" cy="${P.y}" r="8" fill="white" stroke="#2563eb" stroke-width="4"/><circle cx="${Q.x}" cy="${Q.y}" r="8" fill="white" stroke="#2563eb" stroke-width="4"/><circle cx="${R.x}" cy="${R.y}" r="8" fill="white" stroke="#2563eb" stroke-width="4"/>
+      <g font-family="sans-serif" font-size="20" font-weight="800" fill="#172033">
+        <text x="${ma.x+16}" y="${ma.y-8}">a = ${a}</text><text x="${mb.x-82}" y="${mb.y-8}">b = ${b}</text><text x="${mc.x-28}" y="${mc.y+34}">c = ${c}</text>
+        <text x="${P.x-58}" y="${P.y-12}">A = ${A}°</text><text x="${Q.x+14}" y="${Q.y-12}">B = ${B}°</text><text x="${R.x-25}" y="${R.y-22}">C = ${C}°</text>
+      </g>`;
+  }
+  function setGameRole(role,clear=true){
+    state.gameRole=role;state.tool='select';state.selected.clear();
+    document.querySelectorAll('.game-role-btn').forEach(b=>b.classList.toggle('active',b.dataset.role===role));
+    const explain=role==='explain';
+    document.getElementById('gameReference').classList.toggle('hidden',!explain||state.mode!=='game');
+    document.getElementById('freeControls').classList.toggle('hidden',explain||state.mode!=='game');
+    document.getElementById('selectTool').classList.toggle('hidden',explain);document.getElementById('segmentTool').classList.toggle('hidden',explain);document.getElementById('angleTool').classList.toggle('hidden',explain);
+    trash.classList.toggle('hidden',explain);
+    if(clear){stopGameTimer();state.gameStarted=false;state.shapes=[];state.gameFeedback=null;document.getElementById('gameSubmit').disabled=true;document.getElementById('gameMessage').classList.add('hidden');resetStopwatch();}
+    if(explain){state.gameTarget=generateGameProblem(state.gameProblem);renderGameReference();statusText.textContent='삼각형의 정보를 작도 팀에게 설명하세요.'}
+    else statusText.textContent='문제 번호를 맞춘 뒤 시작을 누르세요.';
+    updateToolUI();draw();
+  }
+  function resetStopwatch(){state.gameElapsed=0;document.getElementById('stopwatch').textContent='00:00.0'}
+  function formatTime(ms){const total=Math.max(0,ms),min=Math.floor(total/60000),sec=Math.floor(total%60000/1000),tenths=Math.floor(total%1000/100);return`${String(min).padStart(2,'0')}:${String(sec).padStart(2,'0')}.${tenths}`}
+  function stopGameTimer(){if(state.gameTimer){clearInterval(state.gameTimer);state.gameTimer=null}if(state.gameStarted&&state.gameStartTime)state.gameElapsed=performance.now()-state.gameStartTime}
+  function startGameTimer(){stopGameTimer();state.gameStartTime=performance.now();state.gameTimer=setInterval(()=>{state.gameElapsed=performance.now()-state.gameStartTime;document.getElementById('stopwatch').textContent=formatTime(state.gameElapsed)},100)}
+  function addGameStarter(){
+    const t=state.gameTarget,cx=W*.42,cy=H*.54;
+    if(t.starterType==='segment'){
+      const len=t.sides[t.starterIndex]*pxPerUnit,label=['a','b','c'][t.starterIndex];
+      addSegment(cx-len/2,cy,cx+len/2,cy,{fixedLength:true,locked:true,starter:true,label});
+    }else{
+      const deg=t.angles[t.starterIndex],label=['A','B','C'][t.starterIndex];
+      addAngle(cx,cy,deg,-Math.PI/2,{locked:true,starter:true,label});
+    }
+  }
+  function startGameProblem(){
+    if(state.mode!=='game'||state.gameRole!=='build')return;
+    state.gameProblem=clamp(parseInt(document.getElementById('gameProblemNumber').value)||1,1,100);document.getElementById('gameProblemNumber').value=state.gameProblem;
+    state.gameTarget=generateGameProblem(state.gameProblem);state.shapes=[];state.selected.clear();state.gameFeedback=null;state.gameStarted=true;state.tool='select';state.undo=[];state.redo=[];addGameStarter();resetStopwatch();startGameTimer();
+    document.getElementById('gameSubmit').disabled=false;document.getElementById('gameMessage').classList.add('hidden');statusText.textContent='시작 도형에서 삼각형을 완성한 뒤 제출하세요.';updateToolUI();draw();
+  }
+  function triangleSideUnits(t){return t.trio.map(s=>dist(s.a,s.b)/pxPerUnit).sort((x,y)=>x-y)}
+  function gameTriangleUsesStarter(t){
+    const starter=state.shapes.find(s=>s.starter);if(!starter)return false;
+    if(starter.type==='segment')return t.trio.some(s=>s.id===starter.id);
+    const vi=vertexIndexForPoint(starter.v,t);return angleFitsTriangleAtVertex(starter,t,vi);
+  }
+  function gameTriangleMatches(t){
+    if(!gameTriangleUsesStarter(t))return false;
+    const actual=triangleSideUnits(t),target=[...state.gameTarget.sides].sort((x,y)=>x-y);
+    return actual.every((v,i)=>Math.abs(v-target[i])<=Math.max(.16,target[i]*.035));
+  }
+  function submitGame(){
+    if(!state.gameStarted)return;
+    const triangles=findCompletedTriangles(),match=triangles.find(gameTriangleMatches),msg=document.getElementById('gameMessage');
+    msg.classList.remove('hidden','success','error');
+    if(match){stopGameTimer();state.gameFeedback={success:true,triangle:match};msg.classList.add('success');msg.textContent=`성공! 기록 ${formatTime(state.gameElapsed)}`;document.getElementById('gameSubmit').disabled=true;statusText.textContent='정답입니다! 같은 번호로 다시 도전하거나 다른 문제를 골라 보세요.'}
+    else{state.gameFeedback={success:false};msg.classList.add('error');msg.textContent='아직 정답 삼각형과 다릅니다. 다시 확인해 보세요.'}
+    draw();
+  }
+  document.querySelectorAll('.game-role-btn').forEach(b=>b.addEventListener('click',()=>setGameRole(b.dataset.role)));
+  document.getElementById('gameProblemNumber').addEventListener('change',e=>{
+    state.gameProblem=clamp(parseInt(e.target.value)||1,1,100);e.target.value=state.gameProblem;state.gameTarget=generateGameProblem(state.gameProblem);
+    if(state.gameRole==='explain')renderGameReference();
+    else if(state.gameStarted){stopGameTimer();state.gameStarted=false;state.shapes=[];state.selected.clear();state.gameFeedback=null;document.getElementById('gameSubmit').disabled=true;document.getElementById('gameMessage').classList.add('hidden');resetStopwatch();statusText.textContent='새 문제 번호로 시작을 눌러 주세요.';draw();}
+  });
+  document.getElementById('gameStart').addEventListener('click',()=>{if(state.gameRole==='explain'){state.gameTarget=generateGameProblem(state.gameProblem);renderGameReference()}else startGameProblem()});
+  document.getElementById('gameSubmit').addEventListener('click',submitGame);
 
   const missionBanks=[
     Array.from({length:10},(_,i)=>({type:0,sides:[[3.2,4.1,5],[4,4.8,6.2],[2.8,3.6,4.9],[5,5.5,7],[3.5,3.5,5.8],[4.2,6,7.1],[2.6,4.7,5.3],[3.8,5.4,6.4],[4.4,4.9,7.2],[3,5,6.3]][i]})),
@@ -645,15 +901,25 @@
   }
 
   const tutorialOverlay=document.getElementById('tutorialOverlay');
-  const tutorialPages=[...document.querySelectorAll('.tutorial-page')];
-  function showTutorialPage(index){tutorialPages.forEach((page,i)=>page.classList.toggle('hidden',i!==index));}
-  document.getElementById('tutorialNext').onclick=()=>showTutorialPage(1);
-  document.getElementById('tutorialPrev').onclick=()=>showTutorialPage(0);
+  const missionTutorialPages=[...tutorialOverlay.querySelectorAll('.tutorial-page')];
+  function showMissionTutorialPage(index){missionTutorialPages.forEach((page,i)=>page.classList.toggle('hidden',i!==index));}
+  function openMissionTutorial(){showMissionTutorialPage(0);tutorialOverlay.classList.remove('hidden');}
+  document.getElementById('tutorialNext').onclick=()=>showMissionTutorialPage(1);
+  document.getElementById('tutorialPrev').onclick=()=>showMissionTutorialPage(0);
   document.getElementById('tutorialStart').onclick=()=>tutorialOverlay.classList.add('hidden');
-  document.getElementById('tutorialHelp').onclick=()=>{showTutorialPage(0);tutorialOverlay.classList.remove('hidden')};
   tutorialOverlay.addEventListener('click',e=>{if(e.target.id==='tutorialOverlay')tutorialOverlay.classList.add('hidden')});
 
-  updateToolUI();updateHistoryButtons();resize();setMode('mission');
+  const gameTutorialOverlay=document.getElementById('gameTutorialOverlay');
+  const gameTutorialPages=[...gameTutorialOverlay.querySelectorAll('.game-tutorial-page')];
+  function showGameTutorialPage(index){gameTutorialPages.forEach((page,i)=>page.classList.toggle('hidden',i!==index));}
+  function openGameTutorial(){showGameTutorialPage(0);gameTutorialOverlay.classList.remove('hidden');}
+  document.getElementById('gameTutorialNext').onclick=()=>showGameTutorialPage(1);
+  document.getElementById('gameTutorialPrev').onclick=()=>showGameTutorialPage(0);
+  document.getElementById('gameTutorialStart').onclick=()=>gameTutorialOverlay.classList.add('hidden');
+  gameTutorialOverlay.addEventListener('click',e=>{if(e.target.id==='gameTutorialOverlay')gameTutorialOverlay.classList.add('hidden')});
+  document.getElementById('tutorialHelp').onclick=()=>{if(state.mode==='mission')openMissionTutorial();else if(state.mode==='game')openGameTutorial();};
+
+  updateToolUI();updateHistoryButtons();resize();setMode('free');
 })();
 </script>
 </body>
